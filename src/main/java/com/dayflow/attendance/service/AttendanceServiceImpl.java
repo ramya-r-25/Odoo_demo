@@ -161,13 +161,21 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Override
     @Transactional(readOnly = true)
     public Long getEmployeeIdByUsername(String username) {
-        if ("sarah".equalsIgnoreCase(username)) {
-            return employeeRepository.findByEmployeeCode("EMP-002")
-                    .map(Employee::getId)
-                    .orElse(2L);
+        if (username == null || username.trim().isEmpty()) {
+            return 1L;
         }
-        return employeeRepository.findByEmployeeCode("EMP-001")
-                .map(Employee::getId)
-                .orElse(1L);
+        Optional<Employee> empByEmail = employeeRepository.findByEmail(username.trim());
+        if (empByEmail.isPresent()) {
+            return empByEmail.get().getId();
+        }
+        Optional<Employee> empByCode = employeeRepository.findByEmployeeCode(username.trim());
+        if (empByCode.isPresent()) {
+            return empByCode.get().getId();
+        }
+        Optional<Employee> empById = employeeRepository.findByEmployeeId(username.trim());
+        if (empById.isPresent()) {
+            return empById.get().getId();
+        }
+        return 1L;
     }
 }
