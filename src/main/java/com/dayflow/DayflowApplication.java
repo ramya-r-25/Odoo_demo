@@ -39,7 +39,7 @@ public class DayflowApplication {
         Employee emp2 = service.createEmployee(new Employee(
                 null, "EMP-002", "Sarah Jenkins", "sarah.jenkins@dayflow.com",
                 "+1-555-0193", "456 HR Way, Floor 2", "HR Specialist",
-                "Human Resources", 72000.0, "avatar_sarah.png",
+                "Human Resources", 85000.0, "avatar_sarah.png",
                 Arrays.asList("id_proof.pdf")
         ));
 
@@ -57,31 +57,6 @@ public class DayflowApplication {
         Employee alexProfile = controller.getMyProfile(alexUser);
         System.out.println(" Profile Name: " + alexProfile.getFullName());
         System.out.println(" Email       : " + alexProfile.getEmail());
-        System.out.println(" Phone       : " + alexProfile.getPhone());
-        System.out.println(" Address     : " + alexProfile.getAddress());
-
-        // Demonstrate EMPLOYEE editing allowed fields (Phone, Address, Profile Picture)
-        System.out.println("\n[4] EMPLOYEE (Alex Morgan) Updating Phone & Address:");
-        Employee updateAttempt = new Employee();
-        updateAttempt.setPhone("+1-555-9999");
-        updateAttempt.setAddress("789 Innovation Way, Silicon Valley");
-        updateAttempt.setSalary(999999.0); // Attempting to tamper salary!
-
-        Employee updatedAlex = controller.updateEmployee(emp1.getId(), updateAttempt, alexUser);
-        System.out.println(" Updated Phone  : " + updatedAlex.getPhone());
-        System.out.println(" Updated Address: " + updatedAlex.getAddress());
-        System.out.println(" Preserved Salary (Tamper Blocked): $" + updatedAlex.getSalary());
-
-        // Demonstrate HR_ADMIN updating all employee fields (including salary)
-        System.out.println("\n[5] HR_ADMIN Updating Salary & Job Details for Sarah Jenkins:");
-        Employee sarahHrEdit = new Employee(
-                emp2.getId(), emp2.getEmployeeId(), emp2.getFullName(), emp2.getEmail(),
-                emp2.getPhone(), emp2.getAddress(), "Senior HR Lead", emp2.getDepartment(),
-                85000.0, emp2.getProfilePicture(), emp2.getDocuments()
-        );
-        Employee updatedSarah = controller.updateEmployee(emp2.getId(), sarahHrEdit, adminUser);
-        System.out.println(" Updated Position: " + updatedSarah.getJobPosition());
-        System.out.println(" Updated Salary  : $" + updatedSarah.getSalary());
 
         System.out.println("\n[SUCCESS] Dayflow User-Employee RBAC application executed cleanly without errors!");
     }

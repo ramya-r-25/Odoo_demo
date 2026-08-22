@@ -141,7 +141,7 @@
                 </div>
 
                 <!-- Form -->
-                <form th:action="@{/dashboard}" action="dashboard.html" method="get" onsubmit="window.location.href='dashboard.html'; return false;">
+                <form th:action="@{/login}" action="dashboard.html" method="post">
                     <div class="mb-3">
                         <label class="form-label fw-semibold small" style="color: var(--primary-dark);">Username / Email</label>
                         <div class="input-group">
@@ -190,7 +190,6 @@
     function setDemo(email) {
         document.getElementById('usernameInput').value = email;
         document.getElementById('passwordInput').value = 'pass123';
-        window.location.href = 'dashboard.html';
     }
 </script>
 </body>
