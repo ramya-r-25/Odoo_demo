@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dayflow HRMS - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #31103f 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary: #c084fc;
+            --accent: #38bdf8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-main);
+        }
+
+        .navbar {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #c084fc, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .role-pill {
+            background: rgba(192, 132, 252, 0.2);
+            border: 1px solid rgba(192, 132, 252, 0.4);
+            color: #e9d5ff;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.4);
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: 2.5rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .welcome-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .welcome-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #c084fc;
+        }
+
+        .users-table-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.25rem;
+            padding: 1.75rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.9rem;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-role {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+        }
+
+        .badge-admin {
+            background: rgba(192, 132, 252, 0.2);
+            color: #e9d5ff;
+        }
+
+        .badge-emp {
+            background: rgba(56, 189, 248, 0.2);
+            color: #bae6fd;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">Dayflow HRMS</div>
+        <div class="user-badge">
+            <span class="role-pill">HR / Admin Portal</span>
+            <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit" class="btn-logout">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="welcome-card">
+            <h1 class="welcome-title">Administrator Dashboard</h1>
+            <p style="color: var(--text-muted);">Manage system users, access control roles, and administrative permissions.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">REGISTERED USERS</div>
+                    <div class="stat-number" th:text="${totalUsers}">2</div>
+                </div>
+                <div class="stat-card">
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">ACTIVE ROLE SECURITY</div>
+                    <div class="stat-number">RBAC Enabled</div>
+                </div>
+                <div class="stat-card">
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">CURRENT LOGGED ADMIN</div>
+                    <div style="font-size: 1rem; font-weight: 600; margin-top: 0.5rem; color: #f8fafc;" th:text="${currentUser != null ? currentUser.name : 'HR Admin'}">Sarah Admin</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="users-table-card">
+            <h2 style="font-size: 1.2rem; font-weight: 600;">System Registered Users</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="u : ${userList}">
+                        <td th:text="${u.id}">1</td>
+                        <td th:text="${u.employeeId}">EMP001</td>
+                        <td th:text="${u.name}">John Doe</td>
+                        <td th:text="${u.email}">john@dayflow.com</td>
+                        <td>
+                            <span th:class="${u.role == T(com.dayflow.model.Role).HR_ADMIN ? 'badge-role badge-admin' : 'badge-role badge-emp'}"
+                                  th:text="${u.role}">
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
