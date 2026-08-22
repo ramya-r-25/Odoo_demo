@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dayflow HRMS - Employee Profile</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<!-- Navbar Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/dashboard">Dayflow HRMS</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item" th:if="${isHrAdmin}">
+                    <a class="nav-link text-white-50" href="/employees">Employee List</a>
+                </li>
+                <li class="nav-item" th:if="${!isHrAdmin}">
+                    <a class="nav-link active" href="/employees/profile">My Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white-50" href="/attendance">Attendance</a>
+                </li>
+                <li class="nav-item" th:if="${!isHrAdmin}">
+                    <a class="nav-link text-white-50" href="/leave">Leave Requests</a>
+                </li>
+                <li class="nav-item" th:if="${isHrAdmin}">
+                    <a class="nav-link text-white-50" href="/leave/approvals">Leave Approvals</a>
+                </li>
+                <li class="nav-item" th:if="${isHrAdmin}">
+                    <a class="nav-link text-white-50" href="/payroll">Payroll</a>
+                </li>
+            </ul>
+            <span class="badge bg-secondary me-3" th:text="${isHrAdmin ? 'HR_ADMIN' : 'EMPLOYEE'}">EMPLOYEE</span>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="card shadow-sm mx-auto" style="max-width: 700px;">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0" th:text="${employee.fullName}">Employee Profile</h4>
+            <a th:href="@{/employees/{id}/edit(id=${employee.id})}" class="btn btn-light btn-sm fw-bold">Edit Profile</a>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4 text-center">
+                    <img th:src="${employee.profilePicture != null ? employee.profilePicture : 'https://via.placeholder.com/150'}"
+                         class="img-thumbnail rounded-circle mb-2" alt="Profile Picture" style="width: 140px; height: 140px; object-fit: cover;">
+                    <div>
+                        <span class="badge bg-dark" th:text="${employee.employeeId}">EMP-001</span>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <h5 class="card-title text-primary mb-3" th:text="${employee.fullName}">Alex Morgan</h5>
+                    <p class="card-text mb-2"><strong>Job Position:</strong> <span th:text="${employee.jobPosition}">Software Engineer</span></p>
+                    <p class="card-text mb-2"><strong>Department:</strong> <span th:text="${employee.department}">Engineering</span></p>
+                    <p class="card-text mb-2"><strong>Email:</strong> <span th:text="${employee.email}">alex@dayflow.com</span></p>
+                    <p class="card-text mb-2"><strong>Phone:</strong> <span th:text="${employee.phone}">+1-555-0192</span></p>
+                    <p class="card-text mb-2"><strong>Address:</strong> <span th:text="${employee.address}">123 Tech Blvd</span></p>
+
+                    <!-- Salary visible ONLY to HR_ADMIN -->
+                    <p class="card-text mb-2 text-success" th:if="${isHrAdmin}">
+                        <strong>Salary:</strong> <span class="fw-bold" th:text="${#numbers.formatCurrency(employee.salary)}">$85,000.00</span>
+                    </p>
+                    <p class="card-text mb-2 text-muted" th:if="${!isHrAdmin}">
+                        <strong>Salary:</strong> <em>[Read-Only / Confidential]</em>
+                    </p>
+                </div>
+            </div>
+
+            <hr>
+            <h6 class="fw-bold">Uploaded Documents:</h6>
+            <ul>
+                <li th:each="doc : ${employee.documents}" th:text="${doc}">resume.pdf</li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+</html>

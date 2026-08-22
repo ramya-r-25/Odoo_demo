@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dayflow HRMS - Edit Profile</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<!-- Navbar Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/dashboard">Dayflow HRMS</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item" th:if="${isHrAdmin}">
+                    <a class="nav-link text-white-50" href="/employees">Employee List</a>
+                </li>
+                <li class="nav-item" th:if="${!isHrAdmin}">
+                    <a class="nav-link text-white-50" href="/employees/profile">My Profile</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4" style="max-width: 650px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0" th:text="${isHrAdmin ? 'Edit Employee (HR Admin Access)' : 'Edit My Profile'}">Edit Profile</h4>
+            <span class="badge bg-info text-dark" th:text="${isHrAdmin ? 'Full Edit Rights' : 'Restricted Edit Rights'}">Restricted</span>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/employees/{id}/update(id=${employee.id})}" th:object="${employee}" method="post">
+
+                <!-- Administrative Fields (HR_ADMIN editable, EMPLOYEE read-only) -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Employee ID</label>
+                        <input type="text" class="form-control" th:field="*{employeeId}" th:readonly="${!isHrAdmin}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Full Name</label>
+                        <input type="text" class="form-control" th:field="*{fullName}" th:readonly="${!isHrAdmin}" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Email Address</label>
+                    <input type="email" class="form-control" th:field="*{email}" th:readonly="${!isHrAdmin}" required>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Job Position</label>
+                        <input type="text" class="form-control" th:field="*{jobPosition}" th:readonly="${!isHrAdmin}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Department</label>
+                        <input type="text" class="form-control" th:field="*{department}" th:readonly="${!isHrAdmin}">
+                    </div>
+                </div>
+
+                <!-- Salary Field (Editable ONLY by HR_ADMIN) -->
+                <div class="mb-3" th:if="${isHrAdmin}">
+                    <label class="form-label fw-bold text-success">Salary ($)</label>
+                    <input type="number" step="0.01" class="form-control" th:field="*{salary}">
+                </div>
+
+                <div class="alert alert-secondary py-2" th:if="${!isHrAdmin}">
+                    <small>📌 Note: Employee ID, Name, Email, Job Position, Department, and Salary can be modified only by HR/Admin.</small>
+                </div>
+
+                <!-- Allowed Self-Editable Fields for EMPLOYEE -->
+                <hr>
+                <h6 class="text-primary fw-bold mb-3">Contact & Profile Settings (Editable)</h6>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Phone Number</label>
+                    <input type="text" class="form-control" th:field="*{phone}" placeholder="+1-555-0192">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Address</label>
+                    <textarea class="form-control" th:field="*{address}" rows="3" placeholder="Enter residential address"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Profile Picture URL</label>
+                    <input type="text" class="form-control" th:field="*{profilePicture}" placeholder="avatar.png">
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="/employees/profile" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-success">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
