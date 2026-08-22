@@ -3,16 +3,23 @@ package com.dayflow.service;
 import com.dayflow.model.Employee;
 import com.dayflow.repository.EmployeeRepository;
 import com.dayflow.security.SecurityGroup;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
+@Service
 public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
 
     public EmployeeService(EmployeeRepository employeeRepository) {
         this.employeeRepository = employeeRepository;
+    }
+
+    public Employee getEmployeeByEmail(String email) {
+        return employeeRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Employee not found with Email: " + email));
     }
 
     public Employee createEmployee(Employee employee) {

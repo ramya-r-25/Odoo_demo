@@ -1,14 +1,14 @@
-package com.dayflow.repository;
+package com.dayflow.leave.repository;
 
-import com.dayflow.model.LeaveRequest;
-import com.dayflow.model.LeaveStatus;
-import com.dayflow.model.LeaveType;
+import com.dayflow.leave.model.LeaveRequest;
+import com.dayflow.leave.model.LeaveStatus;
+import com.dayflow.leave.model.LeaveType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
+@Repository("leaveRequestRepositoryM4")
 public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long> {
 
     List<LeaveRequest> findByEmployeeId(Long employeeId);

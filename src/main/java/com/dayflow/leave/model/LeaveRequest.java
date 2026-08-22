@@ -1,5 +1,6 @@
-package com.dayflow.model;
+package com.dayflow.leave.model;
 
+import com.dayflow.model.Employee;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -41,9 +42,8 @@ public class LeaveRequest {
     @Column(columnDefinition = "TEXT")
     private String hrComment;
 
-    // ----------------------------------------------------------------
-    // Constructors
-    // ----------------------------------------------------------------
+    private LocalDate createdAt = LocalDate.now();
+
     public LeaveRequest() {}
 
     public LeaveRequest(Employee employee, LeaveType leaveType,
@@ -54,11 +54,9 @@ public class LeaveRequest {
         this.endDate = endDate;
         this.remarks = remarks;
         this.status = LeaveStatus.PENDING;
+        this.createdAt = LocalDate.now();
     }
 
-    // ----------------------------------------------------------------
-    // Computed helpers
-    // ----------------------------------------------------------------
     @Transient
     public long getDurationDays() {
         if (startDate != null && endDate != null) {
@@ -69,13 +67,10 @@ public class LeaveRequest {
 
     @Transient
     public String getDisplayName() {
-        String empName = (employee != null) ? employee.getName() : "New";
+        String empName = (employee != null) ? employee.getFullName() : "New";
         return empName + " - " + leaveType + " (" + startDate + ")";
     }
 
-    // ----------------------------------------------------------------
-    // Getters & Setters
-    // ----------------------------------------------------------------
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -99,4 +94,7 @@ public class LeaveRequest {
 
     public String getHrComment() { return hrComment; }
     public void setHrComment(String hrComment) { this.hrComment = hrComment; }
+
+    public LocalDate getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDate createdAt) { this.createdAt = createdAt; }
 }

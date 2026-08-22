@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dayflow HRMS - Salary Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/dashboard">Dayflow HRMS</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item" th:if="${isHrAdmin}">
+                    <a class="nav-link text-white-50" href="/employees">Employee List</a>
+                </li>
+                <li class="nav-item" th:if="${!isHrAdmin}">
+                    <a class="nav-link text-white-50" href="/employees/profile">My Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white-50" href="/attendance">Attendance</a>
+                </li>
+                <li class="nav-item" th:if="${!isHrAdmin}">
+                    <a class="nav-link text-white-50" href="/leave">Leave Requests</a>
+                </li>
+                <li class="nav-item" th:if="${isHrAdmin}">
+                    <a class="nav-link text-white-50" href="/leave/approvals">Leave Approvals</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/payroll">Payroll / Salary</a>
+                </li>
+            </ul>
+            <span class="badge" th:classappend="${isHrAdmin ? 'bg-danger' : 'bg-secondary'}" th:text="${currentUserRole}">EMPLOYEE</span>
+            <a href="/logout" class="btn btn-outline-light btn-sm">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Notifications -->
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+    <!-- EMPLOYEE view: Read-only salary -->
+    <div th:if="${!isHrAdmin}" class="card shadow-sm mx-auto" style="max-width: 600px;">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0" th:text="${employee.fullName + ' - Salary Statement'}">My Salary</h5>
+        </div>
+        <div class="card-body text-center">
+            <h6 class="text-muted mb-3">Your current annual package is:</h6>
+            <h1 class="display-4 text-success fw-bold th-currency" th:text="${#numbers.formatCurrency(employee.salary)}">$85,000.00</h1>
+            <hr>
+            <p class="text-muted">For detailed breakdowns or deductions, please contact HR Administration.</p>
+        </div>
+    </div>
+
+    <!-- HR_ADMIN view: Editable list of salaries -->
+    <div th:if="${isHrAdmin}" class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Employee Salary Directory</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Full Name</th>
+                        <th>Department</th>
+                        <th>Job Position</th>
+                        <th>Current Salary</th>
+                        <th>Update Salary</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="emp : ${employees}">
+                        <td th:text="${emp.employeeId}">EMP-001</td>
+                        <td th:text="${emp.fullName}">John Doe</td>
+                        <td th:text="${emp.department}">Engineering</td>
+                        <td th:text="${emp.jobPosition}">Software Engineer</td>
+                        <td th:text="${#numbers.formatCurrency(emp.salary)}">$85,000.00</td>
+                        <td>
+                            <form th:action="@{/payroll/update}" method="post" class="row g-2 align-items-center">
+                                <input type="hidden" name="employeeId" th:value="${emp.id}">
+                                <div class="col-auto">
+                                    <input type="number" step="0.01" name="salary" class="form-control form-control-sm" th:value="${emp.salary}" required>
+                                </div>
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(employees)}">
+                        <td colspan="6" class="text-center text-muted">No employees found.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

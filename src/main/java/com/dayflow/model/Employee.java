@@ -1,54 +1,172 @@
 package com.dayflow.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "employees")
 public class Employee {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Employee name is required")
-    @Column(nullable = false)
-    private String name;
+    @Column(unique = true)
+    private String employeeId;
+
+    private String fullName;
 
     @Column(unique = true)
-    private String employeeCode;
+    private String email;
 
+    private String phone;
+    private String address;
+    private String jobPosition;
     private String department;
+    private Double salary;
+    private String profilePicture;
 
-    private String designation;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "employee_documents", joinColumns = @JoinColumn(name = "employee_id"))
+    @Column(name = "document_path")
+    private List<String> documents = new ArrayList<>();
 
-    // ----------------------------------------------------------------
-    // Constructors
-    // ----------------------------------------------------------------
-    public Employee() {}
-
-    public Employee(String name, String employeeCode, String department, String designation) {
-        this.name = name;
-        this.employeeCode = employeeCode;
-        this.department = department;
-        this.designation = designation;
+    public Employee() {
+        this.documents = new ArrayList<>();
     }
 
-    // ----------------------------------------------------------------
-    // Getters & Setters
-    // ----------------------------------------------------------------
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Employee(Long id, String employeeId, String fullName, String email, String phone, 
+                    String address, String jobPosition, String department, 
+                    Double salary, String profilePicture, List<String> documents) {
+        this.id = id;
+        this.employeeId = employeeId;
+        this.fullName = fullName;
+        this.email = email;
+        this.phone = phone;
+        this.address = address;
+        this.jobPosition = jobPosition;
+        this.department = department;
+        this.salary = salary;
+        this.profilePicture = profilePicture;
+        this.documents = (documents != null) ? new ArrayList<>(documents) : new ArrayList<>();
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getEmployeeCode() { return employeeCode; }
-    public void setEmployeeCode(String employeeCode) { this.employeeCode = employeeCode; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getDepartment() { return department; }
-    public void setDepartment(String department) { this.department = department; }
+    public String getEmployeeId() {
+        return employeeId;
+    }
 
-    public String getDesignation() { return designation; }
-    public void setDesignation(String designation) { this.designation = designation; }
+    public void setEmployeeId(String employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getJobPosition() {
+        return jobPosition;
+    }
+
+    public void setJobPosition(String jobPosition) {
+        this.jobPosition = jobPosition;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
+    public Double getSalary() {
+        return salary;
+    }
+
+    public void setSalary(Double salary) {
+        this.salary = salary;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
+
+    public List<String> getDocuments() {
+        return documents;
+    }
+
+    public void setDocuments(List<String> documents) {
+        this.documents = (documents != null) ? new ArrayList<>(documents) : new ArrayList<>();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Employee employee = (Employee) o;
+        return Objects.equals(id, employee.id) || Objects.equals(employeeId, employee.employeeId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, employeeId);
+    }
+
+    @Override
+    public String toString() {
+        return "Employee{" +
+                "id=" + id +
+                ", employeeId='" + employeeId + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                ", address='" + address + '\'' +
+                ", jobPosition='" + jobPosition + '\'' +
+                ", department='" + department + '\'' +
+                ", salary=" + salary +
+                ", profilePicture='" + profilePicture + '\'' +
+                ", documents=" + documents +
+                '}';
+    }
 }

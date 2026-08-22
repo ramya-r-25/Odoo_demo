@@ -1,4 +1,4 @@
-package com.dayflow.model;
+package com.dayflow.leave.model;
 
 public enum LeaveStatus {
     PENDING,
