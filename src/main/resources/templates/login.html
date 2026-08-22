@@ -13,60 +13,74 @@
         .form-control:focus { border-color: #0d6efd; box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.25); }
         .btn-login { background: linear-gradient(135deg, #0d6efd, #0a58ca); border: none; font-weight: 600; }
         .btn-login:hover { background: linear-gradient(135deg, #0a58ca, #084298); }
+        .demo-badge { cursor: pointer; transition: transform 0.15s; }
+        .demo-badge:hover { transform: scale(1.03); }
     </style>
 </head>
-<body class="d-flex align-items-center justify-content-center">
+<body class="d-flex align-items-center justify-content-center p-3">
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-5 col-lg-4">
+        <div class="col-md-6 col-lg-5 col-xl-4">
             <div class="card login-card border-0">
-                <div class="card-body p-5">
+                <div class="card-body p-4 p-sm-5">
                     <!-- Brand Header -->
                     <div class="text-center mb-4">
-                        <i class="bi bi-people-fill text-primary" style="font-size: 2.5rem;"></i>
-                        <h3 class="brand-title mt-2">Dayflow HRMS</h3>
-                        <p class="text-muted small">Human Resource Management System</p>
+                        <div class="d-inline-block rounded-circle bg-primary bg-opacity-10 p-3 mb-2">
+                            <i class="bi bi-people-fill text-primary" style="font-size: 2.2rem;"></i>
+                        </div>
+                        <h3 class="brand-title mb-1">Dayflow HRMS</h3>
+                        <p class="text-muted small mb-0">Human Resource Management System</p>
                     </div>
 
-                    <!-- Success / Error Alerts -->
-                    <div class="alert alert-danger alert-dismissible fade show" th:if="${param.error}" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        Invalid username or password. Please try again.
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <!-- Alerts -->
+                    <div class="alert alert-danger alert-dismissible fade show py-2 small" th:if="${param.error}" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Invalid username or password.
+                        <button type="button" class="btn-close py-2" data-bs-dismiss="alert"></button>
                     </div>
-                    <div class="alert alert-success alert-dismissible fade show" th:if="${param.logout}" role="alert">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        You have been logged out successfully.
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <div class="alert alert-success alert-dismissible fade show py-2 small" th:if="${param.logout}" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>You have been logged out successfully.
+                        <button type="button" class="btn-close py-2" data-bs-dismiss="alert"></button>
                     </div>
 
                     <!-- Login Form -->
                     <form th:action="@{/login}" method="post">
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Username / Email</label>
+                            <label class="form-label fw-semibold small">Username / Email</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
-                                <input type="text" name="username" class="form-control" placeholder="Enter your email" required autofocus>
+                                <span class="input-group-text bg-light text-muted"><i class="bi bi-person"></i></span>
+                                <input type="text" id="usernameInput" name="username" class="form-control" placeholder="user@dayflow.com" required autofocus>
                             </div>
                         </div>
                         <div class="mb-4">
-                            <label class="form-label fw-semibold">Password</label>
+                            <label class="form-label fw-semibold small">Password</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
-                                <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+                                <span class="input-group-text bg-light text-muted"><i class="bi bi-lock"></i></span>
+                                <input type="password" id="passwordInput" name="password" class="form-control" placeholder="••••••••" required>
                             </div>
                         </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-login btn-lg">
-                                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-login py-2.5">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In to Dashboard
                             </button>
                         </div>
                     </form>
 
+                    <!-- Quick Demo Credentials Hint -->
+                    <div class="p-3 bg-light rounded border text-center">
+                        <small class="fw-bold text-dark d-block mb-1"><i class="bi bi-info-circle me-1 text-primary"></i>Demo Quick Access</small>
+                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+                            <span class="badge bg-primary demo-badge p-2" onclick="setDemo('alex.morgan@dayflow.com')">
+                                <i class="bi bi-person me-1"></i>Employee (Alex)
+                            </span>
+                            <span class="badge bg-danger demo-badge p-2" onclick="setDemo('admin@dayflow.com')">
+                                <i class="bi bi-shield-check me-1"></i>HR Admin
+                            </span>
+                        </div>
+                    </div>
+
                     <div class="text-center mt-4">
-                        <small class="text-muted">
-                            <i class="bi bi-shield-lock me-1"></i>
-                            Secured by Dayflow HRMS v1.0
+                        <small class="text-muted" style="font-size: 0.75rem;">
+                            <i class="bi bi-shield-lock me-1"></i>Secured by Dayflow HRMS v1.0 • All Rights Reserved
                         </small>
                     </div>
                 </div>
@@ -75,5 +89,11 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function setDemo(email) {
+        document.getElementById('usernameInput').value = email;
+        document.getElementById('passwordInput').value = 'pass123';
+    }
+</script>
 </body>
 </html>
