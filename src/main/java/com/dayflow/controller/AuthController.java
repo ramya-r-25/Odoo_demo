@@ -77,4 +77,9 @@ public class AuthController {
             return "register";
         }
     }
+
+    @GetMapping("/access-denied")
+    public String accessDenied() {
+        return "access-denied";
+    }
 }

@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,6 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
 
     private final CustomAuthenticationSuccessHandler successHandler;
@@ -30,9 +32,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .headers(headers -> headers.frameOptions(frame -> frame.disable()))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/h2-console/**").permitAll()
-                .requestMatchers("/admin/**").hasAnyAuthority("ROLE_HR_ADMIN", "HR_ADMIN")
-                .requestMatchers("/employee/**").hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
+                .requestMatchers("/", "/login", "/register", "/access-denied", "/css/**", "/js/**", "/images/**", "/h2-console/**").permitAll()
+                .requestMatchers("/admin/**", "/api/admin/**").hasAnyAuthority("ROLE_HR_ADMIN", "HR_ADMIN")
+                .requestMatchers("/employee/**", "/api/employee/**").hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -50,6 +52,9 @@ public class SecurityConfig {
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
+            )
+            .exceptionHandling(exception -> exception
+                .accessDeniedPage("/access-denied")
             );
 
         return http.build();
@@ -66,7 +71,7 @@ public class SecurityConfig {
     }
 
     /**
-     * Seeds initial demo users into the H2 database on application startup if not present.
+     * Seeds initial demo users into the database on startup if not present.
      */
     @Bean
     public CommandLineRunner initDatabase(UserRepository userRepository, PasswordEncoder encoder) {
