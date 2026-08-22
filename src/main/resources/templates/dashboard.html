@@ -4,252 +4,410 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dayflow HRMS - Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f4f6fb; }
-        .navbar-brand { font-weight: 800; letter-spacing: 1px; font-size: 1.3rem; }
-        .sidebar-card { border-left: 4px solid; border-radius: 10px; transition: transform 0.2s, box-shadow 0.2s; }
-        .sidebar-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important; }
-        .stat-card { border-radius: 12px; border: none; }
-        .stat-icon { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
-        .welcome-banner { background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); border-radius: 14px; }
-        .nav-link.active { background-color: rgba(255,255,255,0.15); border-radius: 6px; }
-        .module-disabled { opacity: 0.6; cursor: not-allowed; }
+        :root {
+            --primary-dark: #191D23;
+            --dark-blue-gray: #57707A;
+            --muted-blue-gray: #7E919F;
+            --soft-gray-lavender: #979DAB;
+            --soft-lavender: #C5BAC4;
+            --light-gray: #DEDEDC;
+            --card-bg: #F2F1F1;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--primary-dark);
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 260px;
+            background-color: var(--primary-dark);
+            color: var(--light-gray);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-brand {
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: var(--light-gray);
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            text-decoration: none;
+        }
+
+        .sidebar-brand-icon {
+            background-color: var(--dark-blue-gray);
+            color: var(--light-gray);
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-item-link {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            color: var(--light-gray);
+            text-decoration: none;
+            font-size: 0.92rem;
+            font-weight: 500;
+            border-radius: 12px;
+            margin-bottom: 0.35rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item-link:hover {
+            background-color: var(--muted-blue-gray);
+            color: var(--light-gray);
+        }
+
+        .nav-item-link.active {
+            background-color: var(--dark-blue-gray);
+            color: var(--light-gray);
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(222, 222, 220, 0.15);
+        }
+
+        /* Main Content Wrapper */
+        .main-wrapper {
+            margin-left: 260px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Navbar */
+        .top-navbar {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--soft-lavender);
+            padding: 0.9rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+
+        .role-badge {
+            background-color: var(--dark-blue-gray);
+            color: var(--light-gray);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+        }
+
+        /* Dashboard Metric Cards */
+        .dashboard-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--soft-lavender);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 100%;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.07);
+        }
+
+        .card-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background-color: var(--soft-lavender);
+            color: var(--dark-blue-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-theme-primary {
+            background-color: var(--primary-dark);
+            color: var(--light-gray);
+            border: none;
+            border-radius: 12px;
+            padding: 0.55rem 1.2rem;
+            font-weight: 600;
+            font-size: 0.88rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-theme-primary:hover {
+            background-color: var(--dark-blue-gray);
+            color: var(--light-gray);
+        }
+
+        .btn-theme-secondary {
+            background-color: var(--soft-lavender);
+            color: var(--primary-dark);
+            border: none;
+            border-radius: 12px;
+            padding: 0.55rem 1.2rem;
+            font-weight: 600;
+            font-size: 0.88rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-theme-secondary:hover {
+            background-color: var(--soft-gray-lavender);
+            color: var(--primary-dark);
+        }
+
+        @media (max-width: 991.98px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-wrapper {
+                margin-left: 0;
+            }
+        }
     </style>
 </head>
 <body>
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
-    <div class="container-fluid px-4">
-        <a class="navbar-brand" href="/dashboard">
-            <i class="bi bi-people-fill me-2 text-primary"></i>Dayflow HRMS
+<!-- Sidebar Navigation -->
+<aside class="sidebar">
+    <a href="/dashboard" class="sidebar-brand">
+        <div class="sidebar-brand-icon">
+            <i class="bi bi-layers-fill"></i>
+        </div>
+        <span>Dayflow</span>
+    </a>
+
+    <nav class="w-100">
+        <a href="/dashboard" class="nav-item-link active">
+            <i class="bi bi-grid-1x2-fill"></i> Dashboard
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="mainNav">
-            <ul class="navbar-nav me-auto ms-3">
-                <li class="nav-item">
-                    <a class="nav-link active" href="/dashboard"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a>
-                </li>
-                <!-- HR_ADMIN Links -->
-                <li class="nav-item" th:if="${isHrAdmin}">
-                    <a class="nav-link" href="/employees"><i class="bi bi-person-lines-fill me-1"></i>Employees</a>
-                </li>
-                <!-- EMPLOYEE Links -->
-                <li class="nav-item" th:if="${!isHrAdmin}">
-                    <a class="nav-link" href="/employees/me"><i class="bi bi-person-circle me-1"></i>My Profile</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/attendance"><i class="bi bi-calendar-check me-1"></i>Attendance</a>
-                </li>
-                <li class="nav-item" th:if="${!isHrAdmin}">
-                    <a class="nav-link" href="/leave"><i class="bi bi-calendar2-minus me-1"></i>Leave</a>
-                </li>
-                <li class="nav-item" th:if="${isHrAdmin}">
-                    <a class="nav-link" href="/leave"><i class="bi bi-calendar2-check me-1"></i>Leave Approvals</a>
-                </li>
-                <li class="nav-item" th:if="${isHrAdmin}">
-                    <a class="nav-link" href="/payroll"><i class="bi bi-cash-stack me-1"></i>Payroll</a>
-                </li>
-                <li class="nav-item" th:if="${isHrAdmin}">
-                    <a class="nav-link" href="/reports"><i class="bi bi-bar-chart-line me-1"></i>Reports</a>
-                </li>
-            </ul>
-            <div class="d-flex align-items-center gap-3">
-                <span class="badge rounded-pill px-3 py-2"
-                      th:classappend="${isHrAdmin ? 'bg-danger' : 'bg-success'}"
-                      th:text="${isHrAdmin ? 'HR Admin' : 'Employee'}">Role</span>
-                <span class="text-light small" th:text="${currentUserName}">User</span>
-                <a href="/logout" class="btn btn-outline-light btn-sm">
-                    <i class="bi bi-box-arrow-right me-1"></i>Logout
-                </a>
+
+        <!-- HR Admin Items -->
+        <a th:if="${isHrAdmin}" href="/employees" class="nav-item-link">
+            <i class="bi bi-people-fill"></i> Employees
+        </a>
+
+        <!-- Employee Items -->
+        <a th:if="${!isHrAdmin}" href="/employees/me" class="nav-item-link">
+            <i class="bi bi-person-circle"></i> My Profile
+        </a>
+
+        <a href="/attendance" class="nav-item-link">
+            <i class="bi bi-clock-history"></i> Attendance
+        </a>
+
+        <a href="/leave" class="nav-item-link">
+            <i class="bi bi-calendar2-check-fill"></i> Leave
+        </a>
+
+        <a th:if="${isHrAdmin}" href="/payroll" class="nav-item-link">
+            <i class="bi bi-cash-stack"></i> Payroll / Salary
+        </a>
+
+        <a th:if="${isHrAdmin}" href="/reports" class="nav-item-link">
+            <i class="bi bi-bar-chart-line-fill"></i> Reports
+        </a>
+    </nav>
+
+    <div class="sidebar-footer w-100">
+        <a href="/logout" class="nav-item-link text-danger">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+    </div>
+</aside>
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+    <!-- Top Navbar -->
+    <header class="top-navbar">
+        <div class="d-flex align-items-center gap-3">
+            <h5 class="fw-bold mb-0" style="color: var(--primary-dark);">Dashboard</h5>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="role-badge" th:text="${isHrAdmin ? 'HR Admin' : 'Employee'}">Role</span>
+            <span class="fw-semibold small" style="color: var(--dark-blue-gray);" th:text="${currentUserName}">User</span>
+        </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="p-4 p-lg-5">
+
+        <!-- Welcome Banner Card -->
+        <div class="dashboard-card mb-4" style="background-color: var(--soft-lavender); border-color: var(--soft-gray-lavender);">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h4 class="fw-bold mb-1" style="color: var(--primary-dark);">
+                        Welcome back, <span th:text="${currentUserName}">User</span>!
+                    </h4>
+                    <p class="mb-0 small" style="color: var(--dark-blue-gray);">
+                        <span th:text="${isHrAdmin ? 'Overview of employee records, attendance, leave approvals, and payroll.' : 'Access your profile, attendance history, leave balances, and salary.'}">Welcome</span>
+                    </p>
+                </div>
+                <div>
+                    <span class="badge px-3 py-2" style="background-color: var(--primary-dark); color: var(--light-gray); font-size: 0.85rem;" id="currentDate"></span>
+                </div>
             </div>
         </div>
-    </div>
-</nav>
 
-<!-- Main Container -->
-<div class="container-fluid px-4 py-4">
-
-    <!-- Success / Error Alerts -->
-    <div class="alert alert-success alert-dismissible fade show" th:if="${successMessage}" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMessage}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-    <div class="alert alert-danger alert-dismissible fade show" th:if="${errorMessage}" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${errorMessage}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-
-    <!-- Welcome Banner -->
-    <div class="welcome-banner text-white p-4 mb-4 shadow-sm">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <div>
-                <h4 class="fw-bold mb-1">
-                    <i class="bi bi-sun me-2"></i>
-                    Welcome back, <span th:text="${currentUserName}">User</span>!
-                </h4>
-                <p class="mb-0 opacity-75">
-                    <span th:text="${isHrAdmin ? 'You have full HR Admin access to all modules.' : 'Access your profile, attendance, and leave from here.'}">Welcome</span>
-                </p>
-            </div>
-            <div class="text-end">
-                <p class="mb-0 opacity-75 small" id="currentDateTime"></p>
-            </div>
-        </div>
-    </div>
-
-    <!-- HR_ADMIN Dashboard -->
-    <div th:if="${isHrAdmin}">
-        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-grid me-2 text-primary"></i>HR Admin Modules</h5>
-        <div class="row g-4">
-            <!-- Employee Management -->
-            <div class="col-md-6 col-lg-3">
-                <div class="card stat-card shadow-sm h-100 sidebar-card border-left border-primary" style="border-left-color: #0d6efd !important;">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div class="stat-icon bg-primary bg-opacity-10 text-primary">
-                                <i class="bi bi-people-fill"></i>
-                            </div>
+        <!-- HR Admin Dashboard Cards -->
+        <div th:if="${isHrAdmin}">
+            <h6 class="fw-bold mb-3" style="color: var(--dark-blue-gray); text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.8rem;">
+                HR Management Cards
+            </h6>
+            <div class="row g-4">
+                <!-- Total Employees -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper">
+                            <i class="bi bi-people"></i>
                         </div>
-                        <h6 class="fw-bold text-dark">Employee Directory</h6>
-                        <p class="text-muted small mb-3">Manage profiles, salaries, departments, and documents.</p>
-                        <a href="/employees" class="btn btn-primary btn-sm w-100">
-                            <i class="bi bi-arrow-right-circle me-1"></i>Open Directory
-                        </a>
+                        <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">Total Employees</h6>
+                        <p class="small mb-3" style="color: var(--dark-blue-gray);">Manage directory & profile records.</p>
+                        <a href="/employees" class="btn-theme-primary w-100">View Employees</a>
                     </div>
                 </div>
-            </div>
-            <!-- Attendance -->
-            <div class="col-md-6 col-lg-3">
-                <div class="card stat-card shadow-sm h-100 sidebar-card" style="border-left: 4px solid #198754;">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div class="stat-icon bg-success bg-opacity-10 text-success">
-                                <i class="bi bi-calendar-check-fill"></i>
-                            </div>
+
+                <!-- Attendance -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper">
+                            <i class="bi bi-clock"></i>
                         </div>
-                        <h6 class="fw-bold text-dark">Attendance Logs</h6>
-                        <p class="text-muted small mb-3">Monitor employee check-in/out and working hours.</p>
-                        <a href="/attendance" class="btn btn-success btn-sm w-100">
-                            <i class="bi bi-arrow-right-circle me-1"></i>View Attendance
-                        </a>
+                        <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">Attendance</h6>
+                        <p class="small mb-3" style="color: var(--dark-blue-gray);">Check-in logs and time records.</p>
+                        <a href="/attendance" class="btn-theme-secondary w-100">View Logs</a>
                     </div>
                 </div>
-            </div>
-            <!-- Leave Approvals -->
-            <div class="col-md-6 col-lg-3">
-                <div class="card stat-card shadow-sm h-100 sidebar-card" style="border-left: 4px solid #ffc107;">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div class="stat-icon bg-warning bg-opacity-10 text-warning">
-                                <i class="bi bi-calendar2-check-fill"></i>
-                            </div>
+
+                <!-- Pending Leaves -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper">
+                            <i class="bi bi-calendar-check"></i>
                         </div>
-                        <h6 class="fw-bold text-dark">Leave Approvals</h6>
-                        <p class="text-muted small mb-3">Review and approve pending employee leave requests.</p>
-                        <a href="/leave" class="btn btn-warning btn-sm w-100 text-dark">
-                            <i class="bi bi-arrow-right-circle me-1"></i>Manage Leaves
-                        </a>
+                        <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">Pending Leaves</h6>
+                        <p class="small mb-3" style="color: var(--dark-blue-gray);">Review leave applications.</p>
+                        <a href="/leave" class="btn-theme-secondary w-100">Leave Approvals</a>
                     </div>
                 </div>
-            </div>
-            <!-- Payroll -->
-            <div class="col-md-6 col-lg-3">
-                <div class="card stat-card shadow-sm h-100 sidebar-card" style="border-left: 4px solid #dc3545;">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div class="stat-icon bg-danger bg-opacity-10 text-danger">
-                                <i class="bi bi-cash-coin"></i>
-                            </div>
+
+                <!-- Payroll -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper">
+                            <i class="bi bi-cash-stack"></i>
                         </div>
-                        <h6 class="fw-bold text-dark">Payroll</h6>
-                        <p class="text-muted small mb-3">Process salary slips and monthly payroll runs.</p>
-                        <a href="/payroll" class="btn btn-danger btn-sm w-100">
-                            <i class="bi bi-arrow-right-circle me-1"></i>Manage Payroll
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <!-- Reports -->
-            <div class="col-md-6 col-lg-3">
-                <div class="card stat-card shadow-sm h-100 sidebar-card" style="border-left: 4px solid #6f42c1;">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div class="stat-icon bg-purple bg-opacity-10 text-purple" style="color: #6f42c1;">
-                                <i class="bi bi-bar-chart-line-fill"></i>
-                            </div>
-                        </div>
-                        <h6 class="fw-bold text-dark">Reports</h6>
-                        <p class="text-muted small mb-3">Generate HR reports, summaries, and analytics.</p>
-                        <a href="/reports" class="btn btn-sm w-100 text-white" style="background-color: #6f42c1;">
-                            <i class="bi bi-arrow-right-circle me-1"></i>View Reports
-                        </a>
+                        <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">Payroll</h6>
+                        <p class="small mb-3" style="color: var(--dark-blue-gray);">Process salary & payslips.</p>
+                        <a href="/payroll" class="btn-theme-primary w-100">Payroll Module</a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- EMPLOYEE Dashboard -->
-    <div th:if="${!isHrAdmin}">
-        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-grid me-2 text-primary"></i>My Modules</h5>
-        <div class="row g-4">
-            <!-- My Profile -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card stat-card shadow-sm h-100 sidebar-card" style="border-left: 4px solid #0d6efd;">
-                    <div class="card-body p-4">
-                        <div class="stat-icon bg-primary bg-opacity-10 text-primary mb-3">
-                            <i class="bi bi-person-circle"></i>
+        <!-- Employee Dashboard Cards -->
+        <div th:if="${!isHrAdmin}">
+            <h6 class="fw-bold mb-3" style="color: var(--dark-blue-gray); text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.8rem;">
+                My Workspace Cards
+            </h6>
+            <div class="row g-4">
+                <!-- Profile -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper">
+                            <i class="bi bi-person"></i>
                         </div>
-                        <h6 class="fw-bold text-dark">My Profile</h6>
-                        <p class="text-muted small mb-3">View and update your phone, address, and profile picture.</p>
-                        <a href="/employees/me" class="btn btn-primary btn-sm w-100">
-                            <i class="bi bi-person-badge me-1"></i>View My Profile
-                        </a>
+                        <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">Profile</h6>
+                        <p class="small mb-3" style="color: var(--dark-blue-gray);">View and update contact details.</p>
+                        <a href="/employees/me" class="btn-theme-primary w-100">My Profile</a>
                     </div>
                 </div>
-            </div>
-            <!-- Attendance -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card stat-card shadow-sm h-100 sidebar-card" style="border-left: 4px solid #198754;">
-                    <div class="card-body p-4">
-                        <div class="stat-icon bg-success bg-opacity-10 text-success mb-3">
-                            <i class="bi bi-calendar-check-fill"></i>
+
+                <!-- Attendance -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper">
+                            <i class="bi bi-clock"></i>
                         </div>
-                        <h6 class="fw-bold text-dark">My Attendance</h6>
-                        <p class="text-muted small mb-3">Check in/out and view your monthly attendance history.</p>
-                        <a href="/attendance" class="btn btn-success btn-sm w-100">
-                            <i class="bi bi-clock me-1"></i>View Attendance
-                        </a>
+                        <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">Attendance</h6>
+                        <p class="small mb-3" style="color: var(--dark-blue-gray);">Check-in/out and working hours.</p>
+                        <a href="/attendance" class="btn-theme-secondary w-100">Check In / Out</a>
                     </div>
                 </div>
-            </div>
-            <!-- Leave -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card stat-card shadow-sm h-100 sidebar-card" style="border-left: 4px solid #ffc107;">
-                    <div class="card-body p-4">
-                        <div class="stat-icon bg-warning bg-opacity-10 text-warning mb-3">
-                            <i class="bi bi-calendar2-minus-fill"></i>
+
+                <!-- Leave -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper">
+                            <i class="bi bi-calendar-minus"></i>
                         </div>
-                        <h6 class="fw-bold text-dark">Leave Requests</h6>
-                        <p class="text-muted small mb-3">Submit new leave applications and track your leave balance.</p>
-                        <a href="/leave" class="btn btn-warning btn-sm w-100 text-dark">
-                            <i class="bi bi-send me-1"></i>Manage Leaves
-                        </a>
+                        <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">Leave</h6>
+                        <p class="small mb-3" style="color: var(--dark-blue-gray);">Apply for leave & check balance.</p>
+                        <a href="/leave" class="btn-theme-secondary w-100">Leave Requests</a>
+                    </div>
+                </div>
+
+                <!-- Salary -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="dashboard-card">
+                        <div class="card-icon-wrapper">
+                            <i class="bi bi-wallet2"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">Salary</h6>
+                        <p class="small mb-3" style="color: var(--dark-blue-gray);">View confidential salary info.</p>
+                        <a href="/employees/me" class="btn-theme-primary w-100">View Salary Card</a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+
+    </main>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.getElementById('currentDateTime').textContent = new Date().toLocaleString('en-IN', { dateStyle: 'full', timeStyle: 'short' });
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 </script>
 </body>
 </html>
