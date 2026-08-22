@@ -1,12 +1,10 @@
 package com.dayflow.attendance.repository;
 
-import com.dayflow.model.Employee;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
-
-@Repository
-public interface EmployeeRepository extends JpaRepository<Employee, Long> {
-    Optional<Employee> findByEmployeeCode(String employeeCode);
+/**
+ * Use com.dayflow.repository.EmployeeRepository instead.
+ * This interface is kept as a type alias to avoid refactoring AttendanceServiceImpl imports.
+ */
+public interface EmployeeRepository extends com.dayflow.repository.EmployeeRepository {
+    // Inherits all methods from the main EmployeeRepository.
+    // Spring Data will resolve to the single Employee JPA repository bean.
 }

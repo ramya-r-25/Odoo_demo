@@ -15,6 +15,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * Central Security Configuration for Dayflow HRMS.
+ * Commit 5: Integrated with all modules — Employee, Attendance, Leave, Payroll, Salary.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
@@ -29,16 +33,68 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            // Disable CSRF for REST API endpoints (form-based pages still use session)
             .csrf(csrf -> csrf.disable())
+            // Allow H2 console frames
             .headers(headers -> headers.frameOptions(frame -> frame.disable()))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/register", "/access-denied", "/css/**", "/js/**", "/images/**", "/h2-console/**").permitAll()
-                // Attendance Specific Permissions
-                .requestMatchers("/api/attendance/check-in", "/api/attendance/check-out", "/api/attendance/my-attendance", "/api/attendance/daily", "/api/attendance/weekly", "/api/attendance/employee/*", "/attendance").hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
-                .requestMatchers("/api/attendance", "/api/attendance/**").hasAnyAuthority("ROLE_HR_ADMIN", "HR_ADMIN")
-                // General Admin & Employee URL Protection
-                .requestMatchers("/admin/**", "/api/admin/**").hasAnyAuthority("ROLE_HR_ADMIN", "HR_ADMIN")
-                .requestMatchers("/employee/**", "/api/employee/**").hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
+
+                // ── Public endpoints ──────────────────────────────────────────────────
+                .requestMatchers(
+                    "/", "/login", "/register", "/access-denied",
+                    "/css/**", "/js/**", "/images/**", "/webjars/**",
+                    "/h2-console/**"
+                ).permitAll()
+
+                // ── Employee Attendance (both roles) ──────────────────────────────────
+                .requestMatchers(
+                    "/attendance",
+                    "/api/attendance/check-in",
+                    "/api/attendance/check-out",
+                    "/api/attendance/my-attendance",
+                    "/api/attendance/daily",
+                    "/api/attendance/weekly",
+                    "/api/attendance/employee/*"
+                ).hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
+
+                // ── Admin-only Attendance (full list) ─────────────────────────────────
+                .requestMatchers(
+                    "/api/attendance",
+                    "/api/attendance/**"
+                ).hasAnyAuthority("ROLE_HR_ADMIN", "HR_ADMIN")
+
+                // ── Employee API — EMPLOYEE can only access own; HR_ADMIN all ─────────
+                // Fine-grained access handled by @PreAuthorize in EmployeeController
+                .requestMatchers("/api/employees/**")
+                    .hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
+
+                // ── Leave Requests — EMPLOYEE can submit/view own; HR_ADMIN can manage ─
+                .requestMatchers("/api/leave-requests/by-employee/**")
+                    .hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
+                .requestMatchers("/api/leave-requests/**")
+                    .hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
+
+                // ── Payroll — EMPLOYEE can view own; HR_ADMIN can manage all ──────────
+                .requestMatchers("/api/payroll/by-employee/**")
+                    .hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
+                .requestMatchers("/api/payroll/**")
+                    .hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
+
+                // ── Salary Structures — active list visible to all authenticated ──────
+                .requestMatchers("/api/salary-structures/active")
+                    .hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
+                .requestMatchers("/api/salary-structures/**")
+                    .hasAnyAuthority("ROLE_HR_ADMIN", "HR_ADMIN")
+
+                // ── Admin UI / API ────────────────────────────────────────────────────
+                .requestMatchers("/admin/**", "/api/admin/**")
+                    .hasAnyAuthority("ROLE_HR_ADMIN", "HR_ADMIN")
+
+                // ── Employee UI ───────────────────────────────────────────────────────
+                .requestMatchers("/employee/**", "/api/employee/**")
+                    .hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
+
+                // ── All other requests must be authenticated ──────────────────────────
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -76,16 +132,19 @@ public class SecurityConfig {
 
     /**
      * Seeds initial demo users into the database on startup if not present.
+     * Credentials: employee@dayflow.com / employee123 | admin@dayflow.com / admin123
      */
     @Bean
     public CommandLineRunner initDatabase(UserRepository userRepository, PasswordEncoder encoder) {
         return args -> {
             if (!userRepository.existsByEmployeeId("EMP001")) {
-                User emp = new User("EMP001", "John Employee", "employee@dayflow.com", encoder.encode("employee123"), Role.EMPLOYEE);
+                User emp = new User("EMP001", "John Employee", "employee@dayflow.com",
+                        encoder.encode("employee123"), Role.EMPLOYEE);
                 userRepository.save(emp);
             }
             if (!userRepository.existsByEmployeeId("HR001")) {
-                User admin = new User("HR001", "Sarah HR Admin", "admin@dayflow.com", encoder.encode("admin123"), Role.HR_ADMIN);
+                User admin = new User("HR001", "Sarah HR Admin", "admin@dayflow.com",
+                        encoder.encode("admin123"), Role.HR_ADMIN);
                 userRepository.save(admin);
             }
         };

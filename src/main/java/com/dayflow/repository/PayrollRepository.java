@@ -9,5 +9,9 @@ import java.util.Optional;
 @Repository
 public interface PayrollRepository extends JpaRepository<Payroll, Long> {
 
-    Optional<Payroll> findByEmployeeId(Long employeeId);
+    /**
+     * Find payroll by the employee's primary key (employee.id).
+     * Spring Data navigates through the ManyToOne join: employee -> id.
+     */
+    Optional<Payroll> findByEmployee_Id(Long employeeId);
 }

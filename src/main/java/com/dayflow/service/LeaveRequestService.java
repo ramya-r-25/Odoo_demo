@@ -5,11 +5,13 @@ import com.dayflow.model.LeaveStatus;
 import com.dayflow.model.LeaveType;
 import com.dayflow.repository.LeaveRequestRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class LeaveRequestService {
 
     private final LeaveRequestRepository leaveRequestRepository;
@@ -21,10 +23,12 @@ public class LeaveRequestService {
     // ----------------------------------------------------------------
     // CRUD
     // ----------------------------------------------------------------
+    @Transactional(readOnly = true)
     public List<LeaveRequest> findAll() {
         return leaveRequestRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Optional<LeaveRequest> findById(Long id) {
         return leaveRequestRepository.findById(id);
     }
@@ -39,18 +43,26 @@ public class LeaveRequestService {
     }
 
     // ----------------------------------------------------------------
-    // Queries
+    // Queries — navigate through the JPA association (employee.id)
     // ----------------------------------------------------------------
+    @Transactional(readOnly = true)
     public List<LeaveRequest> findByEmployeeId(Long employeeId) {
-        return leaveRequestRepository.findByEmployeeId(employeeId);
+        return leaveRequestRepository.findByEmployee_Id(employeeId);
     }
 
+    @Transactional(readOnly = true)
     public List<LeaveRequest> findByStatus(LeaveStatus status) {
         return leaveRequestRepository.findByStatus(status);
     }
 
+    @Transactional(readOnly = true)
     public List<LeaveRequest> findByLeaveType(LeaveType leaveType) {
         return leaveRequestRepository.findByLeaveType(leaveType);
+    }
+
+    @Transactional(readOnly = true)
+    public List<LeaveRequest> findByEmployeeIdAndStatus(Long employeeId, LeaveStatus status) {
+        return leaveRequestRepository.findByEmployee_IdAndStatus(employeeId, status);
     }
 
     // ----------------------------------------------------------------

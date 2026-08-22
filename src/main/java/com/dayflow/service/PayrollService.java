@@ -3,11 +3,13 @@ package com.dayflow.service;
 import com.dayflow.model.Payroll;
 import com.dayflow.repository.PayrollRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class PayrollService {
 
     private final PayrollRepository payrollRepository;
@@ -19,10 +21,12 @@ public class PayrollService {
     // ----------------------------------------------------------------
     // CRUD
     // ----------------------------------------------------------------
+    @Transactional(readOnly = true)
     public List<Payroll> findAll() {
         return payrollRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Optional<Payroll> findById(Long id) {
         return payrollRepository.findById(id);
     }
@@ -36,9 +40,10 @@ public class PayrollService {
     }
 
     // ----------------------------------------------------------------
-    // Queries
+    // Queries — navigate through the JPA association (employee.id)
     // ----------------------------------------------------------------
+    @Transactional(readOnly = true)
     public Optional<Payroll> findByEmployeeId(Long employeeId) {
-        return payrollRepository.findByEmployeeId(employeeId);
+        return payrollRepository.findByEmployee_Id(employeeId);
     }
 }
