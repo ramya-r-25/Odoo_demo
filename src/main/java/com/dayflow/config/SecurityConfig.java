@@ -33,6 +33,10 @@ public class SecurityConfig {
             .headers(headers -> headers.frameOptions(frame -> frame.disable()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/login", "/register", "/access-denied", "/css/**", "/js/**", "/images/**", "/h2-console/**").permitAll()
+                // Attendance Specific Permissions
+                .requestMatchers("/api/attendance/check-in", "/api/attendance/check-out", "/api/attendance/my-attendance", "/api/attendance/daily", "/api/attendance/weekly", "/api/attendance/employee/*", "/attendance").hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
+                .requestMatchers("/api/attendance", "/api/attendance/**").hasAnyAuthority("ROLE_HR_ADMIN", "HR_ADMIN")
+                // General Admin & Employee URL Protection
                 .requestMatchers("/admin/**", "/api/admin/**").hasAnyAuthority("ROLE_HR_ADMIN", "HR_ADMIN")
                 .requestMatchers("/employee/**", "/api/employee/**").hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
                 .anyRequest().authenticated()
