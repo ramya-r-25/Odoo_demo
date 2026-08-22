@@ -2,114 +2,174 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dayflow HRMS - Employee Profile</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6fb; }
+        .navbar-brand { font-weight: 800; }
+        .profile-avatar { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+        .profile-avatar-initials { width: 110px; height: 110px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #0d6efd, #0a58ca); color: #fff; box-shadow: 0 4px 16px rgba(13,110,253,0.3); }
+        .info-row { padding: 0.6rem 0; border-bottom: 1px solid #f0f0f0; }
+        .info-row:last-child { border-bottom: none; }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 
-<!-- Navbar Navigation -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="/dashboard">Dayflow HRMS</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item" th:if="${isHrAdmin}">
-                    <a class="nav-link text-white-50" href="/employees">Employee List</a>
-                </li>
-                <li class="nav-item" th:if="${!isHrAdmin}">
-                    <a class="nav-link active" href="/employees/me">My Profile</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white-50" href="/attendance">Attendance</a>
-                </li>
-                <li class="nav-item" th:if="${!isHrAdmin}">
-                    <a class="nav-link text-white-50" href="/leave">Leave Requests</a>
-                </li>
-                <li class="nav-item" th:if="${isHrAdmin}">
-                    <a class="nav-link text-white-50" href="/leave/approvals">Leave Approvals</a>
-                </li>
-                <li class="nav-item" th:if="${isHrAdmin}">
-                    <a class="nav-link text-white-50" href="/payroll">Payroll</a>
-                </li>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand" href="/dashboard"><i class="bi bi-people-fill me-2 text-primary"></i>Dayflow HRMS</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav me-auto ms-3">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+                <li class="nav-item" th:if="${isHrAdmin}"><a class="nav-link" href="/employees"><i class="bi bi-person-lines-fill me-1"></i>Employees</a></li>
+                <li class="nav-item" th:if="${!isHrAdmin}"><a class="nav-link active" href="/employees/me"><i class="bi bi-person-circle me-1"></i>My Profile</a></li>
+                <li class="nav-item"><a class="nav-link" href="/attendance"><i class="bi bi-calendar-check me-1"></i>Attendance</a></li>
+                <li class="nav-item" th:if="${!isHrAdmin}"><a class="nav-link" href="/leave"><i class="bi bi-calendar2-minus me-1"></i>Leave</a></li>
+                <li class="nav-item" th:if="${isHrAdmin}"><a class="nav-link" href="/leave"><i class="bi bi-calendar2-check me-1"></i>Leave Approvals</a></li>
+                <li class="nav-item" th:if="${isHrAdmin}"><a class="nav-link" href="/payroll"><i class="bi bi-cash-stack me-1"></i>Payroll</a></li>
+                <li class="nav-item" th:if="${isHrAdmin}"><a class="nav-link" href="/reports"><i class="bi bi-bar-chart-line me-1"></i>Reports</a></li>
             </ul>
-            <span class="badge bg-secondary me-3" th:text="${isHrAdmin ? 'HR_ADMIN' : 'EMPLOYEE'}">EMPLOYEE</span>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge rounded-pill px-3 py-2" th:classappend="${isHrAdmin ? 'bg-danger' : 'bg-success'}" th:text="${isHrAdmin ? 'HR Admin' : 'Employee'}">Role</span>
+                <a href="/logout" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
+            </div>
         </div>
     </div>
 </nav>
 
-<div class="container">
-    <!-- Back to Dashboard / Directory Navigation Button -->
-    <div class="mb-3">
-        <a th:href="${isHrAdmin ? '/employees' : '/dashboard'}" class="btn btn-outline-secondary btn-sm">
-            ← Back to <span th:text="${isHrAdmin ? 'Employee Directory' : 'Dashboard'}">Dashboard</span>
-        </a>
+<div class="container-fluid px-4 py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/dashboard" class="text-decoration-none">Dashboard</a></li>
+            <li class="breadcrumb-item" th:if="${isHrAdmin}"><a href="/employees" class="text-decoration-none">Employee Directory</a></li>
+            <li class="breadcrumb-item active" th:text="${employee.fullName}">Profile</li>
+        </ol>
+    </nav>
+
+    <!-- Success/Error Alerts -->
+    <div class="alert alert-success alert-dismissible fade show" th:if="${successMessage}" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div class="alert alert-danger alert-dismissible fade show" th:if="${errorMessage}" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <div class="card shadow-sm mx-auto" style="max-width: 750px;">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0" th:text="${employee.fullName}">Employee Profile</h4>
-            <!-- Edit Button for Allowed Fields -->
-            <a th:href="@{/employees/{id}/edit(id=${employee.id})}" class="btn btn-light btn-sm fw-bold">
-                ✏️ Edit <span th:text="${isHrAdmin ? 'Full Details' : 'Contact Info'}">Profile</span>
-            </a>
-        </div>
-        <div class="card-body">
-            <div class="row mb-3">
-                <div class="col-md-4 text-center">
-                    <img th:src="${employee.profilePicture != null ? employee.profilePicture : 'https://via.placeholder.com/150'}"
-                         class="img-thumbnail rounded-circle mb-2 shadow-sm" alt="Profile Picture" style="width: 140px; height: 140px; object-fit: cover;">
-                    <div>
-                        <span class="badge bg-dark fs-6" th:text="${employee.employeeId}">EMP-001</span>
-                    </div>
+    <div class="row g-4">
+        <!-- Profile Card (Left) -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 text-center p-4">
+                <!-- Avatar -->
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="profile-avatar-initials"
+                         th:text="${employee.fullName != null ? employee.fullName.substring(0,1) : '?'}">A</div>
                 </div>
-                <div class="col-md-8">
-                    <h4 class="card-title text-primary mb-3" th:text="${employee.fullName}">Alex Morgan</h4>
-                    
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <p class="card-text mb-2"><strong>Job Position:</strong><br>
-                                <span class="badge bg-info text-dark" th:text="${employee.jobPosition}">Software Engineer</span>
-                            </p>
-                        </div>
-                        <div class="col-6">
-                            <p class="card-text mb-2"><strong>Department:</strong><br>
-                                <span class="badge bg-secondary" th:text="${employee.department}">Engineering</span>
-                            </p>
-                        </div>
+                <h5 class="fw-bold text-dark mb-1" th:text="${employee.fullName}">Alex Morgan</h5>
+                <p class="text-muted small mb-2" th:text="${employee.jobPosition}">Software Engineer</p>
+                <span class="badge bg-info-subtle text-info border border-info px-3 py-2 mb-3"
+                      th:text="${employee.department}">Engineering</span>
+                <div class="d-grid">
+                    <a th:href="@{/employees/{id}/edit(id=${employee.id})}"
+                       class="btn btn-primary fw-semibold">
+                        <i class="bi bi-pencil-square me-1"></i>
+                        <span th:text="${isHrAdmin ? 'Edit Full Profile' : 'Edit Contact Info'}">Edit</span>
+                    </a>
+                </div>
+                <div class="mt-3">
+                    <a th:href="${isHrAdmin ? '/employees' : '/dashboard'}" class="btn btn-outline-secondary btn-sm w-100">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        <span th:text="${isHrAdmin ? 'Back to Directory' : 'Back to Dashboard'}">Back</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Details Card (Right) -->
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                    <h5 class="fw-bold text-dark"><i class="bi bi-person-badge me-2 text-primary"></i>Employee Information</h5>
+                </div>
+                <div class="card-body px-4 pb-4">
+
+                    <!-- Employee ID -->
+                    <div class="info-row d-flex justify-content-between align-items-center">
+                        <span class="text-muted"><i class="bi bi-hash me-2"></i>Employee ID</span>
+                        <span class="badge bg-dark px-3 py-2" th:text="${employee.employeeId}">EMP-001</span>
+                    </div>
+                    <!-- Email -->
+                    <div class="info-row d-flex justify-content-between align-items-center">
+                        <span class="text-muted"><i class="bi bi-envelope me-2"></i>Email</span>
+                        <span class="fw-semibold" th:text="${employee.email}">alex@dayflow.com</span>
+                    </div>
+                    <!-- Phone -->
+                    <div class="info-row d-flex justify-content-between align-items-center">
+                        <span class="text-muted"><i class="bi bi-phone me-2"></i>Phone</span>
+                        <span class="fw-semibold" th:text="${employee.phone}">+1-555-0192</span>
+                    </div>
+                    <!-- Address -->
+                    <div class="info-row d-flex justify-content-between align-items-center">
+                        <span class="text-muted"><i class="bi bi-geo-alt me-2"></i>Address</span>
+                        <span class="text-end" style="max-width:60%;" th:text="${employee.address}">123 Tech Blvd</span>
+                    </div>
+                    <!-- Job Position -->
+                    <div class="info-row d-flex justify-content-between align-items-center">
+                        <span class="text-muted"><i class="bi bi-briefcase me-2"></i>Job Position</span>
+                        <span class="fw-semibold" th:text="${employee.jobPosition}">Engineer</span>
+                    </div>
+                    <!-- Department -->
+                    <div class="info-row d-flex justify-content-between align-items-center">
+                        <span class="text-muted"><i class="bi bi-building me-2"></i>Department</span>
+                        <span th:text="${employee.department}">Engineering</span>
                     </div>
 
-                    <hr class="my-2">
-
-                    <p class="card-text mb-2"><strong>Email Address:</strong> <span class="text-dark" th:text="${employee.email}">alex@dayflow.com</span></p>
-                    
-                    <!-- Self-Editable Fields Highlighted -->
-                    <p class="card-text mb-2 bg-light p-2 rounded border">
-                        <strong>Phone Number:</strong> <span th:text="${employee.phone}">+1-555-0192</span><br>
-                        <strong>Residential Address:</strong> <span th:text="${employee.address}">123 Tech Blvd</span>
-                    </p>
-
-                    <!-- Salary Information (Read-Only / Protected) -->
-                    <div class="mt-3 p-2 bg-success-subtle rounded border border-success" th:if="${isHrAdmin}">
-                        <strong class="text-success">Salary Structure (HR Admin Access):</strong> 
-                        <span class="fw-bold fs-5 text-success" th:text="${#numbers.formatCurrency(employee.salary)}">$85,000.00</span>
+                    <!-- Salary - HR Admin Only -->
+                    <div class="info-row d-flex justify-content-between align-items-center" th:if="${isHrAdmin}">
+                        <span class="text-muted"><i class="bi bi-cash-coin me-2"></i>Salary</span>
+                        <span class="fw-bold text-success fs-5" th:text="${'$' + employee.salary}">$85000</span>
                     </div>
-
-                    <div class="mt-3 p-2 bg-light rounded border text-muted" th:if="${!isHrAdmin}">
-                        <strong>Salary Information:</strong> <span class="badge bg-outline-secondary">Confidential / Read-Only</span>
+                    <!-- Salary - Hidden for Employee -->
+                    <div class="info-row d-flex justify-content-between align-items-center" th:if="${!isHrAdmin}">
+                        <span class="text-muted"><i class="bi bi-cash-coin me-2"></i>Salary</span>
+                        <span class="badge bg-secondary px-3 py-2"><i class="bi bi-lock me-1"></i>Confidential</span>
                     </div>
                 </div>
             </div>
 
-            <hr>
-            <h6 class="fw-bold text-dark">Uploaded Employee Documents:</h6>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item d-flex justify-content-between align-items-center" th:each="doc : ${employee.documents}">
-                    📄 <span th:text="${doc}">resume.pdf</span>
-                    <span class="badge bg-light text-dark border">Verified</span>
-                </li>
-            </ul>
+            <!-- Documents Card -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                    <h6 class="fw-bold text-dark"><i class="bi bi-folder2-open me-2 text-warning"></i>Employee Documents</h6>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <div th:if="${employee.documents != null and !#lists.isEmpty(employee.documents)}">
+                        <div class="d-flex align-items-center justify-content-between p-3 rounded bg-light mb-2 border"
+                             th:each="doc : ${employee.documents}">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-file-earmark-pdf text-danger fs-5"></i>
+                                <span class="fw-semibold" th:text="${doc}">resume.pdf</span>
+                            </div>
+                            <span class="badge bg-success-subtle text-success border border-success">Verified</span>
+                        </div>
+                    </div>
+                    <div th:if="${employee.documents == null or #lists.isEmpty(employee.documents)}"
+                         class="text-muted text-center py-3">
+                        <i class="bi bi-folder2 d-block mb-1 fs-4"></i>No documents uploaded yet.
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
