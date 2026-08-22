@@ -3,7 +3,7 @@ package com.dayflow.attendance.service;
 import com.dayflow.attendance.dto.AttendanceDTO;
 import com.dayflow.attendance.model.Attendance;
 import com.dayflow.attendance.model.AttendanceStatus;
-import com.dayflow.attendance.model.Employee;
+import com.dayflow.model.Employee;
 import com.dayflow.attendance.repository.AttendanceRepository;
 import com.dayflow.attendance.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
@@ -136,9 +136,10 @@ public class AttendanceServiceImpl implements AttendanceService {
         LocalDateTime timestamp = checkInTime != null ? checkInTime : LocalDateTime.now();
         LocalDate today = timestamp.toLocalDate();
 
-        Optional<Attendance> existingActive = attendanceRepository.findTopByEmployeeIdAndCheckOutIsNullOrderByCheckInDesc(employeeId);
-        if (existingActive.isPresent() && existingActive.get().getDate().equals(today)) {
-            throw new IllegalStateException("Employee is already checked in for today.");
+        // 6. Check-in logic: Prevent duplicate check-in for the same employee on the same date
+        List<Attendance> sameDayRecords = attendanceRepository.findByEmployeeIdAndDateBetweenOrderByDateDesc(employeeId, today, today);
+        if (!sameDayRecords.isEmpty()) {
+            throw new IllegalStateException("Employee is already checked in for today: " + today);
         }
 
         Attendance attendance = new Attendance(employee, today, timestamp, null, AttendanceStatus.PRESENT);
@@ -150,6 +151,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     public AttendanceDTO employeeCheckOut(Long employeeId, LocalDateTime checkOutTime) {
         LocalDateTime timestamp = checkOutTime != null ? checkOutTime : LocalDateTime.now();
 
+        // 7. Check-out logic: Prevent checkout if there is no check-in
         Attendance activeAttendance = attendanceRepository.findTopByEmployeeIdAndCheckOutIsNullOrderByCheckInDesc(employeeId)
                 .orElseThrow(() -> new IllegalStateException("No active check-in record found for employee ID: " + employeeId));
 

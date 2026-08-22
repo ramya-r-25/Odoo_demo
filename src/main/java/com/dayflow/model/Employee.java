@@ -1,4 +1,4 @@
-package com.dayflow.attendance.model;
+package com.dayflow.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

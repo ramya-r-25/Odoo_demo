@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/attendance")
@@ -23,7 +24,7 @@ public class AttendanceController {
         this.attendanceService = attendanceService;
     }
 
-    // 1. Create Attendance Record (Basic Form View submit)
+    // 1. Create Attendance Record
     @PostMapping
     public ResponseEntity<AttendanceDTO> createAttendance(@Valid @RequestBody AttendanceDTO dto) {
         AttendanceDTO created = attendanceService.createAttendance(dto);
@@ -37,21 +38,21 @@ public class AttendanceController {
         return ResponseEntity.ok(updated);
     }
 
-    // 3. Get Attendance Detail (Basic Form View read)
+    // 3. Get Attendance Detail (Basic Form View)
     @GetMapping("/{id}")
     public ResponseEntity<AttendanceDTO> getAttendanceById(@PathVariable Long id) {
         AttendanceDTO dto = attendanceService.getAttendanceById(id);
         return ResponseEntity.ok(dto);
     }
 
-    // 4. Get All Attendance Records (Basic List View / HR Admin View)
+    // 4. Get All Attendance Records (HR_ADMIN View)
     @GetMapping
     public ResponseEntity<List<AttendanceDTO>> getAllAttendances() {
         List<AttendanceDTO> list = attendanceService.getAllAttendances();
         return ResponseEntity.ok(list);
     }
 
-    // 5. Daily Attendance View
+    // 5. Daily Attendance View (HR_ADMIN View)
     @GetMapping("/daily")
     public ResponseEntity<List<AttendanceDTO>> getDailyAttendance(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
@@ -59,7 +60,7 @@ public class AttendanceController {
         return ResponseEntity.ok(list);
     }
 
-    // 6. Weekly Attendance View
+    // 6. Weekly Attendance View (HR_ADMIN View)
     @GetMapping("/weekly")
     public ResponseEntity<List<AttendanceDTO>> getWeeklyAttendance(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate) {
@@ -67,14 +68,14 @@ public class AttendanceController {
         return ResponseEntity.ok(list);
     }
 
-    // 7. Employee-Specific Attendance View
+    // 7. Employee-Specific Attendance View (EMPLOYEE View)
     @GetMapping("/employee/{employeeId}")
     public ResponseEntity<List<AttendanceDTO>> getEmployeeAttendance(@PathVariable Long employeeId) {
         List<AttendanceDTO> list = attendanceService.getEmployeeAttendance(employeeId);
         return ResponseEntity.ok(list);
     }
 
-    // 8. Employee Check-In Endpoint
+    // 8. Employee Check-In Endpoint (EMPLOYEE Action)
     @PostMapping("/check-in")
     public ResponseEntity<AttendanceDTO> checkIn(
             @RequestParam Long employeeId,
@@ -83,12 +84,18 @@ public class AttendanceController {
         return ResponseEntity.ok(dto);
     }
 
-    // 9. Employee Check-Out Endpoint
+    // 9. Employee Check-Out Endpoint (EMPLOYEE Action)
     @PostMapping("/check-out")
     public ResponseEntity<AttendanceDTO> checkOut(
             @RequestParam Long employeeId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime checkOutTime) {
         AttendanceDTO dto = attendanceService.employeeCheckOut(employeeId, checkOutTime);
         return ResponseEntity.ok(dto);
+    }
+
+    // Global exception handler for validation & duplicate check-in errors
+    @ExceptionHandler({IllegalStateException.class, IllegalArgumentException.class})
+    public ResponseEntity<Map<String, String>> handleAttendanceError(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
     }
 }

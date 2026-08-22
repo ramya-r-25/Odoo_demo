@@ -1,5 +1,6 @@
 package com.dayflow.attendance.model;
 
+import com.dayflow.model.Employee;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.Duration;
@@ -56,16 +57,18 @@ public class Attendance {
             }
             this.workingDuration = Math.round((minutes / 60.0) * 100.0) / 100.0;
 
-            // Auto status logic if not set manually to LEAVE or ABSENT
+            // Clear, simple status determination logic:
+            // LEAVE or ABSENT take precedence if explicitly assigned
             if (this.status != AttendanceStatus.LEAVE && this.status != AttendanceStatus.ABSENT) {
                 if (this.workingDuration >= 7.0) {
                     this.status = AttendanceStatus.PRESENT;
                 } else if (this.workingDuration > 0.0) {
                     this.status = AttendanceStatus.HALF_DAY;
+                } else {
+                    this.status = AttendanceStatus.ABSENT;
                 }
             }
         } else if (checkIn != null && checkOut == null) {
-            // Checked in but not yet checked out
             if (this.workingDuration == null) {
                 this.workingDuration = 0.0;
             }

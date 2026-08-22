@@ -1,6 +1,6 @@
 package com.dayflow.attendance.repository;
 
-import com.dayflow.attendance.model.Employee;
+import com.dayflow.model.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
