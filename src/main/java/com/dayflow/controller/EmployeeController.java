@@ -21,12 +21,14 @@ public class EmployeeController {
         return employeeService.getAllEmployees();
     }
 
-    // Endpoint: View employee profile
-    public Employee getEmployeeProfile(Long id, SecurityGroup currentUserRole, Long loggedInUserId) {
-        if (currentUserRole == SecurityGroup.EMPLOYEE && !id.equals(loggedInUserId)) {
-            throw new SecurityException("Access Denied: Employees can view only their own profile");
+    // Endpoint: View employee profile (Server-side URL Tamper Protection)
+    public Employee getEmployeeProfile(Long targetEmployeeId, SecurityGroup currentUserRole, Long loggedInEmployeeId) {
+        if (currentUserRole == SecurityGroup.EMPLOYEE) {
+            if (loggedInEmployeeId == null || !targetEmployeeId.equals(loggedInEmployeeId)) {
+                throw new SecurityException("Access Denied: Employees can view only their own profile");
+            }
         }
-        return employeeService.getEmployeeById(id);
+        return employeeService.getEmployeeById(targetEmployeeId);
     }
 
     // Endpoint: Create employee (HR_ADMIN only)
@@ -37,19 +39,21 @@ public class EmployeeController {
         return employeeService.createEmployee(employee);
     }
 
-    // Endpoint: Edit employee profile
-    public Employee updateEmployee(Long id, Employee updatedData, SecurityGroup currentUserRole, Long loggedInUserId) {
-        if (currentUserRole == SecurityGroup.EMPLOYEE && !id.equals(loggedInUserId)) {
-            throw new SecurityException("Access Denied: Employees can edit only their own profile");
+    // Endpoint: Update employee profile (Server-side Security & URL Tamper Protection)
+    public Employee updateEmployee(Long targetEmployeeId, Employee updatedData, SecurityGroup currentUserRole, Long loggedInEmployeeId) {
+        if (currentUserRole == SecurityGroup.EMPLOYEE) {
+            if (loggedInEmployeeId == null || !targetEmployeeId.equals(loggedInEmployeeId)) {
+                throw new SecurityException("Access Denied: Employees can edit only their own profile");
+            }
         }
-        return employeeService.updateEmployee(id, updatedData, currentUserRole);
+        return employeeService.updateEmployee(targetEmployeeId, updatedData, currentUserRole);
     }
 
     // Endpoint: Delete employee (HR_ADMIN only)
-    public boolean deleteEmployee(Long id, SecurityGroup currentUserRole) {
+    public boolean deleteEmployee(Long targetEmployeeId, SecurityGroup currentUserRole) {
         if (currentUserRole != SecurityGroup.HR_ADMIN) {
             throw new SecurityException("Access Denied: Only HR_ADMIN can delete employees");
         }
-        return employeeService.deleteEmployee(id);
+        return employeeService.deleteEmployee(targetEmployeeId);
     }
 }

@@ -2,6 +2,7 @@ package com.dayflow.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Employee {
     private Long id;
@@ -122,6 +123,19 @@ public class Employee {
 
     public void setDocuments(List<String> documents) {
         this.documents = (documents != null) ? new ArrayList<>(documents) : new ArrayList<>();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Employee employee = (Employee) o;
+        return Objects.equals(id, employee.id) || Objects.equals(employeeId, employee.employeeId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, employeeId);
     }
 
     @Override

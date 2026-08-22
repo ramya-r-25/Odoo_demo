@@ -13,7 +13,7 @@ public class DayflowApplication {
 
     public static void main(String[] args) {
         System.out.println("=================================================================");
-        System.out.println("   STARTING DAYFLOW HRMS - EMPLOYEE PROFILE MANAGEMENT SYSTEM    ");
+        System.out.println("   STARTING DAYFLOW HRMS - STAGE 3 INTEGRATED APPLICATION       ");
         System.out.println("=================================================================");
 
         // Initialize Repository, Service, and Controller
@@ -77,6 +77,6 @@ public class DayflowApplication {
         System.out.println(" Updated Position: " + updatedSarah.getJobPosition());
         System.out.println(" Updated Salary  : $" + updatedSarah.getSalary());
 
-        System.out.println("\n[SUCCESS] Dayflow Employee Profile application executed cleanly without errors!");
+        System.out.println("\n[SUCCESS] Dayflow Stage 3 application executed cleanly without errors!");
     }
 }

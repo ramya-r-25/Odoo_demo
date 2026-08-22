@@ -5,9 +5,11 @@ import com.dayflow.repository.EmployeeRepository;
 import com.dayflow.security.SecurityGroup;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class EmployeeService {
     private final EmployeeRepository employeeRepository;
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
 
     public EmployeeService(EmployeeRepository employeeRepository) {
         this.employeeRepository = employeeRepository;
@@ -52,14 +54,14 @@ public class EmployeeService {
             }
         } else if (userRole == SecurityGroup.EMPLOYEE) {
             // Normal EMPLOYEE can update ONLY: phone, address, profilePicture
+            // Salary, fullName, email, employeeId, jobPosition, department, documents are IMMUTABLE for EMPLOYEE
             existing.setPhone(inputData.getPhone());
             existing.setAddress(inputData.getAddress());
             if (inputData.getProfilePicture() != null && !inputData.getProfilePicture().trim().isEmpty()) {
                 existing.setProfilePicture(inputData.getProfilePicture());
             }
-            // Salary, fullName, email, employeeId, jobPosition, department remain UNCHANGED
         } else {
-            throw new IllegalStateException("Unauthorized user role for profile update");
+            throw new SecurityException("Unauthorized role for employee update");
         }
 
         return employeeRepository.save(existing);
@@ -77,10 +79,13 @@ public class EmployeeService {
             throw new IllegalArgumentException("Validation Error: employeeId is required");
         }
         if (employee.getFullName() == null || employee.getFullName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Validation Error: fullName is required");
+            throw new IllegalArgumentException("Validation Error: Name is required");
         }
         if (employee.getEmail() == null || employee.getEmail().trim().isEmpty()) {
-            throw new IllegalArgumentException("Validation Error: email is required");
+            throw new IllegalArgumentException("Validation Error: Email is required");
+        }
+        if (!EMAIL_PATTERN.matcher(employee.getEmail().trim()).matches()) {
+            throw new IllegalArgumentException("Validation Error: Invalid email format '" + employee.getEmail() + "'");
         }
     }
 }
