@@ -87,20 +87,20 @@
 <body>
 
 <aside class="sidebar">
-    <a href="/dashboard" class="sidebar-brand">
+    <a th:href="@{/dashboard}" href="../dashboard.html" class="sidebar-brand">
         <div class="sidebar-brand-icon"><i class="bi bi-layers-fill"></i></div>
         <span>Dayflow</span>
     </a>
     <nav class="w-100">
-        <a href="/dashboard" class="nav-item-link"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
-        <a href="/employees" class="nav-item-link active"><i class="bi bi-people-fill"></i> Employees</a>
-        <a href="/attendance" class="nav-item-link"><i class="bi bi-clock-history"></i> Attendance</a>
-        <a href="/leave" class="nav-item-link"><i class="bi bi-calendar2-check-fill"></i> Leave</a>
-        <a href="/payroll" class="nav-item-link"><i class="bi bi-cash-stack"></i> Payroll / Salary</a>
-        <a href="/reports" class="nav-item-link"><i class="bi bi-bar-chart-line-fill"></i> Reports</a>
+        <a th:href="@{/dashboard}" href="../dashboard.html" class="nav-item-link"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+        <a th:href="@{/employees}" href="list.html" class="nav-item-link active"><i class="bi bi-people-fill"></i> Employees</a>
+        <a th:href="@{/attendance}" href="../attendance.html" class="nav-item-link"><i class="bi bi-clock-history"></i> Attendance</a>
+        <a th:href="@{/leave}" href="../leave.html" class="nav-item-link"><i class="bi bi-calendar2-check-fill"></i> Leave</a>
+        <a th:href="@{/payroll}" href="../payroll.html" class="nav-item-link"><i class="bi bi-cash-stack"></i> Payroll / Salary</a>
+        <a th:href="@{/reports}" href="../reports.html" class="nav-item-link"><i class="bi bi-bar-chart-line-fill"></i> Reports</a>
     </nav>
     <div class="sidebar-footer w-100">
-        <a href="/logout" class="nav-item-link text-danger"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        <a th:href="@{/logout}" href="../login.html" class="nav-item-link text-danger"><i class="bi bi-box-arrow-right"></i> Logout</a>
     </div>
 </aside>
 
@@ -109,7 +109,7 @@
         <h5 class="fw-bold mb-0" style="color: var(--primary-dark);">Employee Directory</h5>
         <div class="d-flex align-items-center gap-3">
             <span class="badge px-3 py-2" style="background-color: var(--dark-blue-gray); color: var(--light-gray); border-radius: 20px;">HR Admin</span>
-            <a href="/employees/new" class="btn-theme-primary"><i class="bi bi-person-plus me-1"></i>Add Employee</a>
+            <a th:href="@{/employees/new}" href="form.html" class="btn-theme-primary"><i class="bi bi-person-plus me-1"></i>Add Employee</a>
         </div>
     </header>
 
@@ -144,17 +144,30 @@
                             <td th:text="${emp.department}">Engineering</td>
                             <td><strong style="color: var(--primary-dark);" th:text="${'$' + emp.salary}">$85000</strong></td>
                             <td class="text-center">
-                                <a th:href="@{/employees/{id}(id=${emp.id})}" class="btn-theme-secondary me-1">
+                                <a th:href="@{/employees/{id}(id=${emp.id})}" href="profile.html" class="btn-theme-secondary me-1">
                                     <i class="bi bi-eye me-1"></i>View
                                 </a>
-                                <a th:href="@{/employees/{id}/edit(id=${emp.id})}" class="btn-theme-primary py-1 px-3.5 small">
+                                <a th:href="@{/employees/{id}/edit(id=${emp.id})}" href="form.html" class="btn-theme-primary py-1 px-3.5 small">
                                     <i class="bi bi-pencil me-1"></i>Edit
                                 </a>
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(employees)}">
-                            <td colspan="7" class="text-center py-5" style="color: var(--dark-blue-gray);">
-                                <i class="bi bi-people display-6 d-block mb-2"></i>No employee records found.
+                            <td><strong style="color: var(--primary-dark);">EMP-001</strong></td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                         style="width:34px; height:34px; background-color: var(--soft-lavender); color: var(--primary-dark);">A</div>
+                                    <strong>Alex Morgan</strong>
+                                </div>
+                            </td>
+                            <td style="color: var(--dark-blue-gray);">alex.morgan@dayflow.com</td>
+                            <td>Software Engineer</td>
+                            <td>Engineering</td>
+                            <td><strong style="color: var(--primary-dark);">$85,000</strong></td>
+                            <td class="text-center">
+                                <a href="profile.html" class="btn-theme-secondary me-1"><i class="bi bi-eye me-1"></i>View</a>
+                                <a href="form.html" class="btn-theme-primary py-1 px-3.5 small"><i class="bi bi-pencil me-1"></i>Edit</a>
                             </td>
                         </tr>
                     </tbody>

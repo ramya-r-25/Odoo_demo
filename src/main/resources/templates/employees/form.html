@@ -60,7 +60,7 @@
         }
 
         .form-control, .form-select {
-            background-color: var(--card-bg);
+            background-color: #ffffff;
             border: 1px solid var(--soft-lavender);
             color: var(--primary-dark);
             border-radius: 12px;
@@ -108,21 +108,21 @@
 <body>
 
 <aside class="sidebar">
-    <a href="/dashboard" class="sidebar-brand">
+    <a th:href="@{/dashboard}" href="../dashboard.html" class="sidebar-brand">
         <div class="sidebar-brand-icon"><i class="bi bi-layers-fill"></i></div>
         <span>Dayflow</span>
     </a>
     <nav class="w-100">
-        <a href="/dashboard" class="nav-item-link"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
-        <a th:if="${isHrAdmin}" href="/employees" class="nav-item-link active"><i class="bi bi-people-fill"></i> Employees</a>
-        <a th:if="${!isHrAdmin}" href="/employees/me" class="nav-item-link active"><i class="bi bi-person-circle"></i> My Profile</a>
-        <a href="/attendance" class="nav-item-link"><i class="bi bi-clock-history"></i> Attendance</a>
-        <a href="/leave" class="nav-item-link"><i class="bi bi-calendar2-check-fill"></i> Leave</a>
-        <a th:if="${isHrAdmin}" href="/payroll" class="nav-item-link"><i class="bi bi-cash-stack"></i> Payroll / Salary</a>
-        <a th:if="${isHrAdmin}" href="/reports" class="nav-item-link"><i class="bi bi-bar-chart-line-fill"></i> Reports</a>
+        <a th:href="@{/dashboard}" href="../dashboard.html" class="nav-item-link"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+        <a th:if="${isHrAdmin}" th:href="@{/employees}" href="list.html" class="nav-item-link active"><i class="bi bi-people-fill"></i> Employees</a>
+        <a th:if="${!isHrAdmin}" th:href="@{/employees/me}" href="profile.html" class="nav-item-link active"><i class="bi bi-person-circle"></i> My Profile</a>
+        <a th:href="@{/attendance}" href="../attendance.html" class="nav-item-link"><i class="bi bi-clock-history"></i> Attendance</a>
+        <a th:href="@{/leave}" href="../leave.html" class="nav-item-link"><i class="bi bi-calendar2-check-fill"></i> Leave</a>
+        <a th:if="${isHrAdmin}" th:href="@{/payroll}" href="../payroll.html" class="nav-item-link"><i class="bi bi-cash-stack"></i> Payroll / Salary</a>
+        <a th:if="${isHrAdmin}" th:href="@{/reports}" href="../reports.html" class="nav-item-link"><i class="bi bi-bar-chart-line-fill"></i> Reports</a>
     </nav>
     <div class="sidebar-footer w-100">
-        <a href="/logout" class="nav-item-link text-danger"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        <a th:href="@{/logout}" href="../login.html" class="nav-item-link text-danger"><i class="bi bi-box-arrow-right"></i> Logout</a>
     </div>
 </aside>
 
@@ -132,6 +132,7 @@
         <div class="d-flex align-items-center gap-3">
             <span class="badge px-3 py-2" style="background-color: var(--dark-blue-gray); color: var(--light-gray); border-radius: 20px;"
                   th:text="${isHrAdmin ? 'HR Full Access' : 'Restricted Edit'}">Rights</span>
+            <a th:href="@{/logout}" href="../login.html" class="btn-theme-secondary py-1.5 px-3 small"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
         </div>
     </header>
 
@@ -139,7 +140,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-9 col-xl-8">
                 <div class="theme-card">
-                    <form th:action="@{/employees/{id}/update(id=${employee.id})}" th:object="${employee}" method="post">
+                    <form th:action="${employee != null ? '/employees/' + employee.id + '/update' : 'profile.html'}" action="profile.html" method="get" onsubmit="window.location.href='profile.html'; return false;">
                         
                         <!-- Administrative Section -->
                         <h6 class="fw-bold mb-3" style="color: var(--dark-blue-gray); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px;">
@@ -149,33 +150,33 @@
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Employee ID</label>
-                                <input type="text" class="form-control" th:field="*{employeeId}" th:readonly="${!isHrAdmin}" required>
+                                <input type="text" class="form-control" name="employeeId" value="EMP-001" th:value="${employee != null ? employee.employeeId : 'EMP-001'}" th:readonly="${!isHrAdmin}">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Full Name</label>
-                                <input type="text" class="form-control" th:field="*{fullName}" th:readonly="${!isHrAdmin}" required>
+                                <input type="text" class="form-control" name="fullName" value="Alex Morgan" th:value="${employee != null ? employee.fullName : 'Alex Morgan'}" th:readonly="${!isHrAdmin}">
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Email Address</label>
-                            <input type="email" class="form-control" th:field="*{email}" th:readonly="${!isHrAdmin}" required>
+                            <input type="email" class="form-control" name="email" value="alex.morgan@dayflow.com" th:value="${employee != null ? employee.email : 'alex.morgan@dayflow.com'}" th:readonly="${!isHrAdmin}">
                         </div>
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Job Position</label>
-                                <input type="text" class="form-control" th:field="*{jobPosition}" th:readonly="${!isHrAdmin}">
+                                <input type="text" class="form-control" name="jobPosition" value="Software Engineer" th:value="${employee != null ? employee.jobPosition : 'Software Engineer'}" th:readonly="${!isHrAdmin}">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Department</label>
-                                <input type="text" class="form-control" th:field="*{department}" th:readonly="${!isHrAdmin}">
+                                <input type="text" class="form-control" name="department" value="Engineering" th:value="${employee != null ? employee.department : 'Engineering'}" th:readonly="${!isHrAdmin}">
                             </div>
                         </div>
 
                         <div class="mb-3" th:if="${isHrAdmin}">
                             <label class="form-label fw-bold" style="color: var(--primary-dark);">Salary ($)</label>
-                            <input type="number" step="0.01" class="form-control" th:field="*{salary}">
+                            <input type="number" step="0.01" class="form-control" name="salary" value="85000" th:value="${employee != null ? employee.salary : '85000'}">
                         </div>
 
                         <div class="p-3 rounded mb-4" style="background-color: var(--light-gray); border: 1px solid var(--soft-lavender);" th:if="${!isHrAdmin}">
@@ -190,21 +191,21 @@
 
                         <div class="mb-3">
                             <label class="form-label">Phone Number</label>
-                            <input type="text" class="form-control" th:field="*{phone}" placeholder="+1-555-0192">
+                            <input type="text" class="form-control" name="phone" value="+1-555-0192" th:value="${employee != null ? employee.phone : '+1-555-0192'}" placeholder="+1-555-0192">
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Residential Address</label>
-                            <textarea class="form-control" th:field="*{address}" rows="3" placeholder="Enter address"></textarea>
+                            <textarea class="form-control" name="address" rows="3" placeholder="Enter address">123 Tech Blvd, Suite 400</textarea>
                         </div>
 
                         <div class="mb-4">
                             <label class="form-label">Profile Picture Reference</label>
-                            <input type="text" class="form-control" th:field="*{profilePicture}" placeholder="avatar.png">
+                            <input type="text" class="form-control" name="profilePicture" value="avatar_alex.png" th:value="${employee != null ? employee.profilePicture : 'avatar_alex.png'}" placeholder="avatar.png">
                         </div>
 
                         <div class="d-flex justify-content-between gap-2 mt-4">
-                            <a th:href="@{/employees/{id}(id=${employee.id})}" class="btn-theme-secondary">Cancel</a>
+                            <a th:href="${employee != null ? '/employees/' + employee.id : 'profile.html'}" href="profile.html" class="btn-theme-secondary">Cancel</a>
                             <button type="submit" class="btn-theme-primary"><i class="bi bi-check2-circle me-1"></i>Save Changes</button>
                         </div>
                     </form>

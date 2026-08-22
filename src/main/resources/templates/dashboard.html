@@ -212,7 +212,7 @@
 
 <!-- Sidebar Navigation -->
 <aside class="sidebar">
-    <a href="/dashboard" class="sidebar-brand">
+    <a th:href="@{/dashboard}" href="dashboard.html" class="sidebar-brand">
         <div class="sidebar-brand-icon">
             <i class="bi bi-layers-fill"></i>
         </div>
@@ -220,39 +220,39 @@
     </a>
 
     <nav class="w-100">
-        <a href="/dashboard" class="nav-item-link active">
+        <a th:href="@{/dashboard}" href="dashboard.html" class="nav-item-link active">
             <i class="bi bi-grid-1x2-fill"></i> Dashboard
         </a>
 
         <!-- HR Admin Items -->
-        <a th:if="${isHrAdmin}" href="/employees" class="nav-item-link">
+        <a th:if="${isHrAdmin}" th:href="@{/employees}" href="employees/list.html" class="nav-item-link">
             <i class="bi bi-people-fill"></i> Employees
         </a>
 
         <!-- Employee Items -->
-        <a th:if="${!isHrAdmin}" href="/employees/me" class="nav-item-link">
+        <a th:if="${!isHrAdmin}" th:href="@{/employees/me}" href="employees/profile.html" class="nav-item-link">
             <i class="bi bi-person-circle"></i> My Profile
         </a>
 
-        <a href="/attendance" class="nav-item-link">
+        <a th:href="@{/attendance}" href="attendance.html" class="nav-item-link">
             <i class="bi bi-clock-history"></i> Attendance
         </a>
 
-        <a href="/leave" class="nav-item-link">
+        <a th:href="@{/leave}" href="leave.html" class="nav-item-link">
             <i class="bi bi-calendar2-check-fill"></i> Leave
         </a>
 
-        <a th:if="${isHrAdmin}" href="/payroll" class="nav-item-link">
+        <a th:if="${isHrAdmin}" th:href="@{/payroll}" href="payroll.html" class="nav-item-link">
             <i class="bi bi-cash-stack"></i> Payroll / Salary
         </a>
 
-        <a th:if="${isHrAdmin}" href="/reports" class="nav-item-link">
+        <a th:if="${isHrAdmin}" th:href="@{/reports}" href="reports.html" class="nav-item-link">
             <i class="bi bi-bar-chart-line-fill"></i> Reports
         </a>
     </nav>
 
     <div class="sidebar-footer w-100">
-        <a href="/logout" class="nav-item-link text-danger">
+        <a th:href="@{/logout}" href="login.html" class="nav-item-link text-danger">
             <i class="bi bi-box-arrow-right"></i> Logout
         </a>
     </div>
@@ -292,11 +292,11 @@
         </div>
 
         <!-- HR Admin Dashboard Cards -->
-        <div th:if="${isHrAdmin}">
+        <div th:if="${isHrAdmin != null ? isHrAdmin : true}">
             <h6 class="fw-bold mb-3" style="color: var(--dark-blue-gray); text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.8rem;">
                 HR Management Cards
             </h6>
-            <div class="row g-4">
+            <div class="row g-4 mb-4">
                 <!-- Total Employees -->
                 <div class="col-md-6 col-lg-3">
                     <div class="dashboard-card">
@@ -305,7 +305,7 @@
                         </div>
                         <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">Total Employees</h6>
                         <p class="small mb-3" style="color: var(--dark-blue-gray);">Manage directory & profile records.</p>
-                        <a href="/employees" class="btn-theme-primary w-100">View Employees</a>
+                        <a th:href="@{/employees}" href="employees/list.html" class="btn-theme-primary w-100">View Employees</a>
                     </div>
                 </div>
 
@@ -317,7 +317,7 @@
                         </div>
                         <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">Attendance</h6>
                         <p class="small mb-3" style="color: var(--dark-blue-gray);">Check-in logs and time records.</p>
-                        <a href="/attendance" class="btn-theme-secondary w-100">View Logs</a>
+                        <a th:href="@{/attendance}" href="attendance.html" class="btn-theme-secondary w-100">View Logs</a>
                     </div>
                 </div>
 
@@ -329,7 +329,7 @@
                         </div>
                         <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">Pending Leaves</h6>
                         <p class="small mb-3" style="color: var(--dark-blue-gray);">Review leave applications.</p>
-                        <a href="/leave" class="btn-theme-secondary w-100">Leave Approvals</a>
+                        <a th:href="@{/leave}" href="leave.html" class="btn-theme-secondary w-100">Leave Approvals</a>
                     </div>
                 </div>
 
@@ -341,14 +341,14 @@
                         </div>
                         <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">Payroll</h6>
                         <p class="small mb-3" style="color: var(--dark-blue-gray);">Process salary & payslips.</p>
-                        <a href="/payroll" class="btn-theme-primary w-100">Payroll Module</a>
+                        <a th:href="@{/payroll}" href="payroll.html" class="btn-theme-primary w-100">Payroll Module</a>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Employee Dashboard Cards -->
-        <div th:if="${!isHrAdmin}">
+        <div th:if="${isHrAdmin == false}">
             <h6 class="fw-bold mb-3" style="color: var(--dark-blue-gray); text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.8rem;">
                 My Workspace Cards
             </h6>
@@ -361,7 +361,7 @@
                         </div>
                         <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">Profile</h6>
                         <p class="small mb-3" style="color: var(--dark-blue-gray);">View and update contact details.</p>
-                        <a href="/employees/me" class="btn-theme-primary w-100">My Profile</a>
+                        <a th:href="@{/employees/me}" href="employees/profile.html" class="btn-theme-primary w-100">My Profile</a>
                     </div>
                 </div>
 
@@ -373,7 +373,7 @@
                         </div>
                         <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">Attendance</h6>
                         <p class="small mb-3" style="color: var(--dark-blue-gray);">Check-in/out and working hours.</p>
-                        <a href="/attendance" class="btn-theme-secondary w-100">Check In / Out</a>
+                        <a th:href="@{/attendance}" href="attendance.html" class="btn-theme-secondary w-100">Check In / Out</a>
                     </div>
                 </div>
 
@@ -385,7 +385,7 @@
                         </div>
                         <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">Leave</h6>
                         <p class="small mb-3" style="color: var(--dark-blue-gray);">Apply for leave & check balance.</p>
-                        <a href="/leave" class="btn-theme-secondary w-100">Leave Requests</a>
+                        <a th:href="@{/leave}" href="leave.html" class="btn-theme-secondary w-100">Leave Requests</a>
                     </div>
                 </div>
 
@@ -397,7 +397,7 @@
                         </div>
                         <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">Salary</h6>
                         <p class="small mb-3" style="color: var(--dark-blue-gray);">View confidential salary info.</p>
-                        <a href="/employees/me" class="btn-theme-primary w-100">View Salary Card</a>
+                        <a th:href="@{/employees/me}" href="employees/profile.html" class="btn-theme-primary w-100">View Salary Card</a>
                     </div>
                 </div>
             </div>
