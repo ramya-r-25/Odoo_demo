@@ -1,7 +1,6 @@
 package com.dayflow.attendance.service;
 
 import com.dayflow.attendance.dto.AttendanceDTO;
-import com.dayflow.attendance.model.AttendanceStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,4 +27,6 @@ public interface AttendanceService {
     AttendanceDTO employeeCheckIn(Long employeeId, LocalDateTime checkInTime);
 
     AttendanceDTO employeeCheckOut(Long employeeId, LocalDateTime checkOutTime);
+
+    Long getEmployeeIdByUsername(String username);
 }

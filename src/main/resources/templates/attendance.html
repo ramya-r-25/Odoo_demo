@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dayflow - Attendance Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-primary: #6366f1;
+            --accent-hover: #4f46e5;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Navbar */
+        .navbar {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-badge {
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            padding: 0.4rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            color: #a5b4fc;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        /* Today Attendance Card */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Status Badge */
+        .badge {
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-present { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-half_day { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-absent { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge-leave { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .badge-none { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
+
+        /* Action Buttons */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            padding: 0.85rem 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-checkin {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-checkin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+        }
+
+        .btn-checkout {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-checkout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+        }
+
+        /* Filter Tabs */
+        .filter-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        /* Data Table */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            padding: 1rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.95rem;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .alert {
+            padding: 0.85rem 1.25rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .alert-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .alert-success { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="brand">Dayflow HRMS</div>
+        <div class="nav-right">
+            <span class="user-badge" th:text="${username} + ' (' + (${isHrAdmin} ? 'HR Admin' : 'Employee') + ')'">User</span>
+            <a href="/logout" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        
+        <div id="alertBox" class="alert"></div>
+
+        <!-- Today's Attendance Overview Card -->
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Today's Attendance</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;" th:text="${#temporals.format(#temporals.createToday(), 'EEEE, MMMM d, yyyy')}">Date</p>
+                </div>
+                <div>
+                    <span th:if="${todayRecord != null}" th:class="'badge badge-' + ${#strings.toLowerCase(todayRecord.status)}" th:text="${todayRecord.status}">Status</span>
+                    <span th:if="${todayRecord == null}" class="badge badge-none">Not Checked In</span>
+                </div>
+            </div>
+
+            <div class="actions-grid">
+                <button class="btn btn-checkin" onclick="performCheckIn()">
+                    ⏱️ Check In
+                </button>
+                <button class="btn btn-checkout" onclick="performCheckOut()">
+                    🛑 Check Out
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--card-border);">
+                <div>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem;">Check In Time</p>
+                    <p style="font-size: 1.1rem; font-weight: 600;" th:text="${todayRecord != null && todayRecord.checkIn != null} ? ${#temporals.format(todayRecord.checkIn, 'hh:mm:ss a')} : '--:--'">--:--</p>
+                </div>
+                <div>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem;">Check Out Time</p>
+                    <p style="font-size: 1.1rem; font-weight: 600;" th:text="${todayRecord != null && todayRecord.checkOut != null} ? ${#temporals.format(todayRecord.checkOut, 'hh:mm:ss a')} : '--:--'">--:--</p>
+                </div>
+                <div>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem;">Working Duration</p>
+                    <p style="font-size: 1.1rem; font-weight: 600;" th:text="${todayRecord != null && todayRecord.workingDuration != null} ? ${todayRecord.workingDuration} + ' hrs' : '0.0 hrs'">0.0 hrs</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance History Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Attendance Log & History</h2>
+            </div>
+
+            <div class="filter-bar">
+                <a href="/attendance?view=my" th:class="'tab-btn ' + (${currentView == 'my'} ? 'active' : '')">My Attendance</a>
+                <a href="/attendance?view=daily" th:class="'tab-btn ' + (${currentView == 'daily'} ? 'active' : '')">Daily View</a>
+                <a href="/attendance?view=weekly" th:class="'tab-btn ' + (${currentView == 'weekly'} ? 'active' : '')">Weekly View</a>
+                <a th:if="${isHrAdmin}" href="/attendance?view=all" th:class="'tab-btn ' + (${currentView == 'all'} ? 'active' : '')">All Employees (HR)</a>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Employee Code</th>
+                            <th>Employee Name</th>
+                            <th>Check-In</th>
+                            <th>Check-Out</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="record : ${history}">
+                            <td th:text="${record.date}">2026-08-22</td>
+                            <td th:text="${record.employeeCode}">EMP-001</td>
+                            <td th:text="${record.employeeName}">Alex Morgan</td>
+                            <td th:text="${record.checkIn != null} ? ${#temporals.format(record.checkIn, 'hh:mm:ss a')} : '-'">-</td>
+                            <td th:text="${record.checkOut != null} ? ${#temporals.format(record.checkOut, 'hh:mm:ss a')} : '-'">-</td>
+                            <td th:text="${record.workingDuration != null} ? ${record.workingDuration} + ' hrs' : '0.0 hrs'">0.0 hrs</td>
+                            <td>
+                                <span th:class="'badge badge-' + ${#strings.toLowerCase(record.status)}" th:text="${record.status}">PRESENT</span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(history)}">
+                            <td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 2rem;">No attendance records found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script th:inline="javascript">
+        const employeeId = [[${employeeId}]];
+
+        function showAlert(msg, isSuccess) {
+            const box = document.getElementById('alertBox');
+            box.style.display = 'block';
+            box.className = 'alert ' + (isSuccess ? 'alert-success' : 'alert-danger');
+            box.innerText = msg;
+            setTimeout(() => { box.style.display = 'none'; }, 4000);
+        }
+
+        async function performCheckIn() {
+            try {
+                const response = await fetch('/api/attendance/check-in?employeeId=' + employeeId, { method: 'POST' });
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('Check-in successful!', true);
+                    setTimeout(() => location.reload(), 800);
+                } else {
+                    showAlert(data.error || 'Check-in failed', false);
+                }
+            } catch (err) {
+                showAlert('Error performing check-in', false);
+            }
+        }
+
+        async function performCheckOut() {
+            try {
+                const response = await fetch('/api/attendance/check-out?employeeId=' + employeeId, { method: 'POST' });
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('Check-out successful!', true);
+                    setTimeout(() => location.reload(), 800);
+                } else {
+                    showAlert(data.error || 'Check-out failed', false);
+                }
+            } catch (err) {
+                showAlert('Error performing check-out', false);
+            }
+        }
+    </script>
+</body>
+</html>
