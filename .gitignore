@@ -6,3 +6,7 @@ sources.txt
 .classpath
 .project
 .settings/
+*.class
+.DS_Store
+__pycache__/
+*.pyc

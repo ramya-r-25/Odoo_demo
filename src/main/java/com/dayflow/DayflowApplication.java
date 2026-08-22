@@ -13,6 +13,9 @@ import org.springframework.context.annotation.Bean;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Main Entry Point for Dayflow HRMS Spring Boot Application.
+ */
 @SpringBootApplication
 public class DayflowApplication {
 
@@ -21,7 +24,7 @@ public class DayflowApplication {
     }
 
     @Bean
-    public CommandLineRunner seedInitialData(EmployeeRepository employeeRepository, AttendanceRepository attendanceRepository) {
+    public CommandLineRunner seedAttendanceData(EmployeeRepository employeeRepository, AttendanceRepository attendanceRepository) {
         return args -> {
             if (employeeRepository.count() == 0) {
                 Employee emp1 = employeeRepository.save(new Employee("EMP-001", "Alex Morgan", "alex@dayflow.com", "Engineering"));
