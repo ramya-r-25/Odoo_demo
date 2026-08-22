@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dayflow HRMS - Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/dashboard">Dayflow HRMS</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Navigation Links -->
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item" th:if="${isHrAdmin}">
+                    <a class="nav-link" href="/employees">Employee List</a>
+                </li>
+                <li class="nav-item" th:if="${!isHrAdmin}">
+                    <a class="nav-link" href="/employees/profile">My Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/attendance">Attendance</a>
+                </li>
+                <li class="nav-item" th:if="${!isHrAdmin}">
+                    <a class="nav-link" href="/leave">Leave Requests</a>
+                </li>
+                <li class="nav-item" th:if="${isHrAdmin}">
+                    <a class="nav-link" href="/leave/approvals">Leave Approvals</a>
+                </li>
+                <li class="nav-item" th:if="${isHrAdmin}">
+                    <a class="nav-link" href="/payroll">Payroll</a>
+                </li>
+            </ul>
+            <span class="navbar-text text-light me-3" th:text="${currentUserRole}">HR_ADMIN</span>
+            <a href="/logout" class="btn btn-outline-light btn-sm">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Container -->
+<div class="container my-4">
+    <h2 class="mb-4">Welcome to Dayflow HRMS Dashboard</h2>
+
+    <!-- Employee Navigation Cards -->
+    <div class="row g-4" th:if="${!isHrAdmin}">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">My Profile</h5>
+                    <p class="card-text text-muted">View and update your contact phone, address, and profile picture.</p>
+                    <a href="/employees/profile" class="btn btn-primary btn-sm">Go to My Profile</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Attendance</h5>
+                    <p class="card-text text-muted">Check in / out and view your monthly work attendance record.</p>
+                    <a href="/attendance" class="btn btn-outline-success btn-sm disabled">Attendance Module</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">Leave Requests</h5>
+                    <p class="card-text text-muted">Submit new leave requests and check your leave balance.</p>
+                    <a href="/leave" class="btn btn-outline-warning btn-sm disabled">Leave Requests</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HR / Admin Navigation Cards -->
+    <div class="row g-4" th:if="${isHrAdmin}">
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">Employee List</h5>
+                    <p class="card-text text-muted">Manage employee records, salary structures, and profiles.</p>
+                    <a href="/employees" class="btn btn-primary btn-sm">View Employee Directory</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Attendance</h5>
+                    <p class="card-text text-muted">Monitor employee check-in/check-out logs and working hours.</p>
+                    <a href="/attendance" class="btn btn-outline-success btn-sm disabled">Attendance Logs</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">Leave Approvals</h5>
+                    <p class="card-text text-muted">Review and approve pending employee leave applications.</p>
+                    <a href="/leave/approvals" class="btn btn-outline-warning btn-sm disabled">Leave Approvals</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">Payroll</h5>
+                    <p class="card-text text-muted">Process salary slips, deductions, and monthly payrolls.</p>
+                    <a href="/payroll" class="btn btn-outline-danger btn-sm disabled">Payroll Module</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

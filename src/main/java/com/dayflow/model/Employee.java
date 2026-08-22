@@ -20,6 +20,7 @@ public class Employee {
     @Column
     private String employeeId;
 
+    @NotBlank(message = "Employee name is required")
     @Column(nullable = false)
     private String name;
 
@@ -42,6 +43,9 @@ public class Employee {
     private String department;
 
     @Column
+    private String designation;
+
+    @Column
     private Double salary;
 
     @Column
@@ -50,7 +54,18 @@ public class Employee {
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> documents = new ArrayList<>();
 
-    public Employee() {
+    // ----------------------------------------------------------------
+    // Constructors
+    // ----------------------------------------------------------------
+    public Employee() {}
+
+    public Employee(String employeeCode, String name, String email, String department) {
+        this.employeeCode = employeeCode;
+        this.employeeId = employeeCode;
+        this.name = name;
+        this.fullName = name;
+        this.email = email;
+        this.department = department;
     }
 
     public Employee(Long id, String employeeCode, String name, String email, String department) {
@@ -63,17 +78,8 @@ public class Employee {
         this.department = department;
     }
 
-    public Employee(String employeeCode, String name, String email, String department) {
-        this.employeeCode = employeeCode;
-        this.employeeId = employeeCode;
-        this.name = name;
-        this.fullName = name;
-        this.email = email;
-        this.department = department;
-    }
-
-    public Employee(Long id, String employeeId, String fullName, String email, String phone, 
-                    String address, String jobPosition, String department, 
+    public Employee(Long id, String employeeId, String fullName, String email, String phone,
+                    String address, String jobPosition, String department,
                     Double salary, String profilePicture, List<String> documents) {
         this.id = id;
         this.employeeCode = employeeId;
@@ -87,16 +93,14 @@ public class Employee {
         this.department = department;
         this.salary = salary;
         this.profilePicture = profilePicture;
-        this.documents = (documents != null) ? new ArrayList<>(documents) : new ArrayList<>();
+        this.documents = documents != null ? new ArrayList<>(documents) : new ArrayList<>();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    // ----------------------------------------------------------------
+    // Getters & Setters
+    // ----------------------------------------------------------------
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public String getEmployeeCode() {
         return employeeCode != null ? employeeCode : employeeId;
@@ -134,66 +138,31 @@ public class Employee {
         this.name = fullName;
     }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
 
-    public String getPhone() {
-        return phone;
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+    public String getJobPosition() { return jobPosition; }
+    public void setJobPosition(String jobPosition) { this.jobPosition = jobPosition; }
 
-    public String getAddress() {
-        return address;
-    }
+    public String getDepartment() { return department; }
+    public void setDepartment(String department) { this.department = department; }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+    public String getDesignation() { return designation; }
+    public void setDesignation(String designation) { this.designation = designation; }
 
-    public String getJobPosition() {
-        return jobPosition;
-    }
+    public Double getSalary() { return salary; }
+    public void setSalary(Double salary) { this.salary = salary; }
 
-    public void setJobPosition(String jobPosition) {
-        this.jobPosition = jobPosition;
-    }
+    public String getProfilePicture() { return profilePicture; }
+    public void setProfilePicture(String profilePicture) { this.profilePicture = profilePicture; }
 
-    public String getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(String department) {
-        this.department = department;
-    }
-
-    public Double getSalary() {
-        return salary;
-    }
-
-    public void setSalary(Double salary) {
-        this.salary = salary;
-    }
-
-    public String getProfilePicture() {
-        return profilePicture;
-    }
-
-    public void setProfilePicture(String profilePicture) {
-        this.profilePicture = profilePicture;
-    }
-
-    public List<String> getDocuments() {
-        return documents;
-    }
-
+    public List<String> getDocuments() { return documents; }
     public void setDocuments(List<String> documents) {
         this.documents = (documents != null) ? new ArrayList<>(documents) : new ArrayList<>();
     }

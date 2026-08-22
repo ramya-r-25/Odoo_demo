@@ -1,12 +1,27 @@
+# Maven
 target/
-bin/
-sources.txt
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
 .idea/
 *.iml
-.classpath
-.project
+.vscode/
 .settings/
-*.class
+.project
+.classpath
+
+# OS
 .DS_Store
-__pycache__/
-*.pyc
+Thumbs.db
+
+# Compiled
+*.class
+*.jar
+*.war
+
+# Logs
+*.log
+logs/
+
+# H2
+*.db
