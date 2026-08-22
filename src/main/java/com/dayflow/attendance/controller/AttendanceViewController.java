@@ -12,6 +12,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Thymeleaf View Controller for /attendance.
+ * Resolves the authenticated user's employee ID via the service layer (no hardcoding).
+ * HR_ADMIN can see all records; EMPLOYEE sees only their own.
+ */
 @Controller
 public class AttendanceViewController {
 
@@ -28,8 +33,11 @@ public class AttendanceViewController {
             Authentication authentication,
             Model model) {
 
-        String username = authentication != null ? authentication.getName() : "alex";
-        boolean isHrAdmin = authentication != null && authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_HR_ADMIN"));
+        String username = authentication != null ? authentication.getName() : "";
+        boolean isHrAdmin = authentication != null
+                && authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_HR_ADMIN"));
+
+        // Resolve current employee ID — null safe (will be null if no employee profile linked)
         Long currentEmployeeId = attendanceService.getEmployeeIdByUsername(username);
 
         List<AttendanceDTO> history;
@@ -43,15 +51,20 @@ public class AttendanceViewController {
             history = attendanceService.getWeeklyAttendance(LocalDate.now());
         } else if (isHrAdmin) {
             history = attendanceService.getAllAttendances();
-        } else {
+        } else if (currentEmployeeId != null) {
             history = attendanceService.getEmployeeAttendance(currentEmployeeId);
+        } else {
+            history = List.of(); // no linked employee profile
         }
 
-        List<AttendanceDTO> myRecords = attendanceService.getEmployeeAttendance(currentEmployeeId);
-        AttendanceDTO todayRecord = myRecords.stream()
-                .filter(a -> LocalDate.now().equals(a.getDate()))
-                .findFirst()
-                .orElse(null);
+        // Today's record for check-in/check-out button state
+        AttendanceDTO todayRecord = null;
+        if (currentEmployeeId != null) {
+            todayRecord = attendanceService.getEmployeeAttendance(currentEmployeeId).stream()
+                    .filter(a -> LocalDate.now().equals(a.getDate()))
+                    .findFirst()
+                    .orElse(null);
+        }
 
         model.addAttribute("username", username);
         model.addAttribute("employeeId", currentEmployeeId);

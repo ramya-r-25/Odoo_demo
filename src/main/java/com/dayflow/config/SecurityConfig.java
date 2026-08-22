@@ -35,12 +35,31 @@ public class SecurityConfig {
             .headers(headers -> headers.frameOptions(frame -> frame.disable()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/login", "/register", "/access-denied", "/css/**", "/js/**", "/images/**", "/h2-console/**").permitAll()
-                // Attendance Specific Permissions
-                .requestMatchers("/api/attendance/check-in", "/api/attendance/check-out", "/api/attendance/my-attendance", "/api/attendance/daily", "/api/attendance/weekly", "/api/attendance/employee/*", "/attendance").hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
-                .requestMatchers("/api/attendance", "/api/attendance/**").hasAnyAuthority("ROLE_HR_ADMIN", "HR_ADMIN")
-                // General Admin & Employee URL Protection
+                // Attendance: Employee & HR Admin
+                .requestMatchers("/attendance", "/api/attendance/check-in", "/api/attendance/check-out",
+                    "/api/attendance/my-attendance", "/api/attendance/daily",
+                    "/api/attendance/weekly", "/api/attendance/employee/*")
+                    .hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
+                // Attendance admin endpoints
+                .requestMatchers("/api/attendance", "/api/attendance/**")
+                    .hasAnyAuthority("ROLE_HR_ADMIN", "HR_ADMIN")
+                // Leave: Employee (apply, view own) + HR Admin (approve/reject)
+                .requestMatchers("/leave", "/api/leave/apply", "/api/leave/my")
+                    .hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
+                .requestMatchers("/api/leave/all", "/api/leave/pending", "/api/leave/*/approve", "/api/leave/*/reject")
+                    .hasAnyAuthority("ROLE_HR_ADMIN", "HR_ADMIN")
+                .requestMatchers("/api/leave/**")
+                    .hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
+                // Dashboard, profile, employees
+                .requestMatchers("/dashboard", "/employees/**", "/api/employees/**")
+                    .hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
+                // Payroll & reports: HR Admin only
+                .requestMatchers("/payroll", "/reports", "/api/payroll/**", "/api/reports/**")
+                    .hasAnyAuthority("ROLE_HR_ADMIN", "HR_ADMIN")
+                // General admin protection
                 .requestMatchers("/admin/**", "/api/admin/**").hasAnyAuthority("ROLE_HR_ADMIN", "HR_ADMIN")
-                .requestMatchers("/employee/**", "/api/employee/**").hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
+                .requestMatchers("/employee/**", "/api/employee/**")
+                    .hasAnyAuthority("ROLE_EMPLOYEE", "EMPLOYEE", "ROLE_HR_ADMIN", "HR_ADMIN")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exception -> exception

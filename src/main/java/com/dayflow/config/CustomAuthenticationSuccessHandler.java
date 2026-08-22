@@ -23,10 +23,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         boolean isAdmin = authorities.stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_HR_ADMIN") || a.getAuthority().equals("HR_ADMIN"));
 
-        if (isAdmin) {
-            response.sendRedirect("/admin/dashboard");
-        } else {
-            response.sendRedirect("/employee/dashboard");
-        }
+        // Both roles land on unified /dashboard — DashboardController renders role-specific content
+        response.sendRedirect("/dashboard");
     }
 }

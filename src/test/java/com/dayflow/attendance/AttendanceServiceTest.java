@@ -6,6 +6,7 @@ import com.dayflow.model.Employee;
 import com.dayflow.attendance.repository.AttendanceRepository;
 import com.dayflow.attendance.repository.EmployeeRepository;
 import com.dayflow.attendance.service.AttendanceService;
+import com.dayflow.leave.repository.LeaveRequestRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +30,15 @@ public class AttendanceServiceTest {
     @Autowired
     private AttendanceRepository attendanceRepository;
 
+    @Autowired
+    private LeaveRequestRepository leaveRequestRepository;
+
     private Employee testEmployee;
 
     @BeforeEach
     public void setUp() {
+        // Delete in FK-safe order: leaves → attendance → employees
+        leaveRequestRepository.deleteAll();
         attendanceRepository.deleteAll();
         employeeRepository.deleteAll();
 

@@ -6,6 +6,7 @@ import com.dayflow.attendance.model.AttendanceStatus;
 import com.dayflow.model.Employee;
 import com.dayflow.attendance.repository.AttendanceRepository;
 import com.dayflow.attendance.repository.EmployeeRepository;
+import com.dayflow.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,10 +23,14 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
     private final EmployeeRepository employeeRepository;
+    private final UserRepository userRepository;
 
-    public AttendanceServiceImpl(AttendanceRepository attendanceRepository, EmployeeRepository employeeRepository) {
+    public AttendanceServiceImpl(AttendanceRepository attendanceRepository,
+                                  EmployeeRepository employeeRepository,
+                                  UserRepository userRepository) {
         this.attendanceRepository = attendanceRepository;
         this.employeeRepository = employeeRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -161,13 +166,22 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Override
     @Transactional(readOnly = true)
     public Long getEmployeeIdByUsername(String username) {
-        if ("sarah".equalsIgnoreCase(username)) {
-            return employeeRepository.findByEmployeeCode("EMP-002")
-                    .map(Employee::getId)
-                    .orElse(2L);
-        }
-        return employeeRepository.findByEmployeeCode("EMP-001")
-                .map(Employee::getId)
-                .orElse(1L);
+        // Resolve User by email or employeeId login identifier
+        return userRepository.findByEmailOrEmployeeId(username, username)
+                .map(user -> {
+                    // First try to match by user's employeeId field → employee code
+                    String empCode = user.getEmployeeId();
+                    if (empCode != null) {
+                        java.util.Optional<Employee> byCode = employeeRepository.findByEmployeeCode(empCode);
+                        if (byCode.isPresent()) return byCode.get().getId();
+                    }
+                    // Fallback: match by email
+                    return employeeRepository.findAll().stream()
+                            .filter(e -> user.getEmail().equalsIgnoreCase(e.getEmail()))
+                            .findFirst()
+                            .map(Employee::getId)
+                            .orElse(null);
+                })
+                .orElse(null);
     }
 }

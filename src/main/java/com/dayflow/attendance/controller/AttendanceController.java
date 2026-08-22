@@ -38,6 +38,9 @@ public class AttendanceController {
 
         if (!isHrAdmin) {
             // For EMPLOYEE role, ALWAYS use authenticated employee identity to prevent parameter tampering
+            if (authenticatedEmployeeId == null) {
+                throw new IllegalStateException("No employee profile linked to your account. Please contact HR Admin.");
+            }
             return authenticatedEmployeeId;
         } else {
             // For HR_ADMIN, allow specifying employeeId or default to authenticated user
@@ -53,6 +56,9 @@ public class AttendanceController {
         boolean isHrAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_HR_ADMIN"));
         if (!isHrAdmin) {
             Long authenticatedEmployeeId = attendanceService.getEmployeeIdByUsername(authentication.getName());
+            if (authenticatedEmployeeId == null) {
+                throw new AccessDeniedException("Forbidden: No employee profile linked to your account.");
+            }
             if (!authenticatedEmployeeId.equals(targetEmployeeId)) {
                 throw new AccessDeniedException("Forbidden: Employees are not allowed to access another employee's attendance.");
             }

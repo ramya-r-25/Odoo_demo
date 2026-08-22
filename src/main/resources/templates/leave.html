@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dayflow HRMS - Leave</title>
+    <title>Dayflow HRMS - Leave Management</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
         body { background-color: #f4f6fb; }
         .navbar-brand { font-weight: 800; }
         .stat-card { border-radius: 12px; border: none; }
+        .badge-PENDING { background-color: #fff3cd; color: #856404; border: 1px solid #ffc107; }
+        .badge-APPROVED { background-color: #d1e7dd; color: #0a3622; border: 1px solid #198754; }
+        .badge-REJECTED { background-color: #f8d7da; color: #58151c; border: 1px solid #dc3545; }
     </style>
 </head>
 <body>
@@ -32,7 +35,10 @@
                 <li class="nav-item" th:if="${isHrAdmin}"><a class="nav-link" href="/reports"><i class="bi bi-bar-chart-line me-1"></i>Reports</a></li>
             </ul>
             <div class="d-flex align-items-center gap-3">
-                <span class="badge rounded-pill px-3 py-2" th:classappend="${isHrAdmin ? 'bg-danger' : 'bg-success'}" th:text="${isHrAdmin ? 'HR Admin' : 'Employee'}">Role</span>
+                <span class="badge rounded-pill px-3 py-2"
+                      th:classappend="${isHrAdmin ? 'bg-danger' : 'bg-success'}"
+                      th:text="${isHrAdmin ? 'HR Admin' : 'Employee'}">Role</span>
+                <span class="text-light small" th:text="${username}">User</span>
                 <a href="/logout" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
             </div>
         </div>
@@ -40,62 +46,80 @@
 </nav>
 
 <div class="container-fluid px-4 py-4">
+
+    <!-- Alerts -->
+    <div class="alert alert-success alert-dismissible fade show" id="successAlert" style="display:none!important" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i><span id="successMsg"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div class="alert alert-danger alert-dismissible fade show" id="errorAlert" style="display:none!important" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i><span id="errorMsg"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/dashboard" class="text-decoration-none">Dashboard</a></li>
-            <li class="breadcrumb-item active" th:text="${isHrAdmin ? 'Leave Approvals' : 'Leave Requests'}">Leave</li>
+            <li class="breadcrumb-item active"
+                th:text="${isHrAdmin ? 'Leave Approvals' : 'My Leave'}">Leave</li>
         </ol>
     </nav>
 
+    <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="fw-bold mb-0">
             <i class="bi bi-calendar2-check-fill text-warning me-2"></i>
             <span th:text="${isHrAdmin ? 'Leave Approvals' : 'My Leave Requests'}">Leave</span>
         </h4>
-        <button class="btn btn-warning text-dark fw-semibold" th:if="${!isHrAdmin}" data-bs-toggle="modal" data-bs-target="#applyLeaveModal">
+        <!-- Apply Leave Button (Employee only) -->
+        <button class="btn btn-warning text-dark fw-semibold" th:if="${!isHrAdmin}"
+                data-bs-toggle="modal" data-bs-target="#applyLeaveModal">
             <i class="bi bi-plus-circle me-1"></i>Apply Leave
         </button>
     </div>
 
-    <!-- Leave Balance Cards (Employee only) -->
-    <div class="row g-3 mb-4" th:if="${!isHrAdmin}">
-        <div class="col-md-3">
-            <div class="card stat-card shadow-sm text-center p-3" style="border-top: 4px solid #0d6efd;">
-                <h6 class="text-muted small">Annual Leave</h6>
-                <h3 class="fw-bold text-primary">12</h3>
-                <small class="text-muted">Days Remaining</small>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card shadow-sm text-center p-3" style="border-top: 4px solid #198754;">
-                <h6 class="text-muted small">Sick Leave</h6>
-                <h3 class="fw-bold text-success">6</h3>
-                <small class="text-muted">Days Remaining</small>
-            </div>
-        </div>
-        <div class="col-md-3">
+    <!-- Stats Row (HR Admin) -->
+    <div class="row g-3 mb-4" th:if="${isHrAdmin}">
+        <div class="col-md-4">
             <div class="card stat-card shadow-sm text-center p-3" style="border-top: 4px solid #ffc107;">
-                <h6 class="text-muted small">Casual Leave</h6>
-                <h3 class="fw-bold text-warning">4</h3>
-                <small class="text-muted">Days Remaining</small>
+                <h6 class="text-muted small">Pending Requests</h6>
+                <h3 class="fw-bold text-warning" th:text="${pendingCount}">0</h3>
+                <small class="text-muted">Awaiting Approval</small>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
+            <div class="card stat-card shadow-sm text-center p-3" style="border-top: 4px solid #198754;">
+                <h6 class="text-muted small">Approved</h6>
+                <h3 class="fw-bold text-success" th:text="${approvedCount}">0</h3>
+                <small class="text-muted">This View</small>
+            </div>
+        </div>
+        <div class="col-md-4">
             <div class="card stat-card shadow-sm text-center p-3" style="border-top: 4px solid #dc3545;">
-                <h6 class="text-muted small">Used This Year</h6>
-                <h3 class="fw-bold text-danger">8</h3>
-                <small class="text-muted">Days Taken</small>
+                <h6 class="text-muted small">Rejected</h6>
+                <h3 class="fw-bold text-danger" th:text="${rejectedCount}">0</h3>
+                <small class="text-muted">This View</small>
             </div>
         </div>
     </div>
 
-    <!-- Leave Requests Table -->
+    <!-- Filter Tabs (HR Admin) -->
+    <div class="mb-3" th:if="${isHrAdmin}">
+        <a href="/leave?view=all" class="btn btn-sm me-2"
+           th:classappend="${currentView == 'all'} ? 'btn-primary' : 'btn-outline-secondary'">All Leaves</a>
+        <a href="/leave?view=pending" class="btn btn-sm me-2"
+           th:classappend="${currentView == 'pending'} ? 'btn-warning' : 'btn-outline-secondary'">
+            Pending <span class="badge bg-danger ms-1" th:text="${pendingCount}" th:if="${pendingCount > 0}"></span>
+        </a>
+    </div>
+
+    <!-- Leave Table -->
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
             <h6 class="fw-bold text-dark">
                 <i class="bi bi-table me-2 text-warning"></i>
-                <span th:text="${isHrAdmin ? 'Pending Leave Requests' : 'My Leave History'}">Leave</span>
+                <span th:text="${isHrAdmin ? 'Leave Requests' : 'My Leave History'}">Leaves</span>
             </h6>
         </div>
         <div class="card-body p-4">
@@ -108,31 +132,61 @@
                             <th>From Date</th>
                             <th>To Date</th>
                             <th>Days</th>
+                            <th>Reason</th>
                             <th>Status</th>
                             <th th:if="${isHrAdmin}">Actions</th>
+                            <th th:if="${!isHrAdmin}">Reviewed By</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td th:if="${isHrAdmin}">Alex Morgan</td>
-                            <td>Annual Leave</td>
-                            <td>25 Aug 2026</td>
-                            <td>27 Aug 2026</td>
-                            <td>3</td>
-                            <td><span class="badge bg-warning-subtle text-warning border border-warning">Pending</span></td>
+                        <tr th:each="leave : ${leaveList}">
                             <td th:if="${isHrAdmin}">
-                                <button class="btn btn-sm btn-success me-1"><i class="bi bi-check2"></i> Approve</button>
-                                <button class="btn btn-sm btn-danger"><i class="bi bi-x"></i> Reject</button>
+                                <span class="fw-semibold" th:text="${leave.employeeName}">Employee</span><br>
+                                <small class="text-muted" th:text="${leave.employeeCode}">Code</small>
+                            </td>
+                            <td th:text="${leave.leaveTypeDisplay}">Annual Leave</td>
+                            <td th:text="${leave.fromDate}">2026-08-25</td>
+                            <td th:text="${leave.toDate}">2026-08-27</td>
+                            <td th:text="${leave.totalDays}">3</td>
+                            <td>
+                                <span th:text="${leave.reason != null ? leave.reason : '-'}"
+                                      class="text-muted small">Reason</span>
+                            </td>
+                            <td>
+                                <span th:class="'badge badge-' + ${leave.status}"
+                                      th:text="${leave.statusDisplay}">Pending</span>
+                            </td>
+                            <!-- HR Admin Action Buttons (only for PENDING) -->
+                            <td th:if="${isHrAdmin}">
+                                <div th:if="${leave.status.name() == 'PENDING'}" class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-success"
+                                            th:onclick="'approveLeave(' + ${leave.id} + ')'">
+                                        <i class="bi bi-check2"></i> Approve
+                                    </button>
+                                    <button class="btn btn-sm btn-danger"
+                                            th:onclick="'rejectLeave(' + ${leave.id} + ')'">
+                                        <i class="bi bi-x"></i> Reject
+                                    </button>
+                                </div>
+                                <span th:if="${leave.status.name() != 'PENDING'}"
+                                      class="text-muted small">
+                                    <span th:text="${leave.reviewedBy != null ? 'By: ' + leave.reviewedBy : 'Actioned'}"></span>
+                                </span>
+                            </td>
+                            <!-- Employee view: reviewer info -->
+                            <td th:if="${!isHrAdmin}">
+                                <span class="text-muted small"
+                                      th:text="${leave.reviewedBy != null ? leave.reviewedBy : '-'}">-</span>
                             </td>
                         </tr>
-                        <tr>
-                            <td th:if="${isHrAdmin}">Sarah Jenkins</td>
-                            <td>Sick Leave</td>
-                            <td>20 Aug 2026</td>
-                            <td>20 Aug 2026</td>
-                            <td>1</td>
-                            <td><span class="badge bg-success-subtle text-success border border-success">Approved</span></td>
-                            <td th:if="${isHrAdmin}"><span class="text-muted small">Actioned</span></td>
+                        <!-- Empty state -->
+                        <tr th:if="${#lists.isEmpty(leaveList)}">
+                            <td th:colspan="${isHrAdmin ? 8 : 7}" class="text-center text-muted py-4">
+                                <i class="bi bi-calendar-x me-2"></i>
+                                <span th:text="${isHrAdmin ? 'No leave requests found.' : 'You have no leave requests. Click Apply Leave to submit one.'}">
+                                    No records.
+                                </span>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -141,7 +195,7 @@
     </div>
 </div>
 
-<!-- Apply Leave Modal -->
+<!-- Apply Leave Modal (Employee only) -->
 <div class="modal fade" id="applyLeaveModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -150,39 +204,110 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
-                <form>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Leave Type</label>
-                        <select class="form-select">
-                            <option>Annual Leave</option>
-                            <option>Sick Leave</option>
-                            <option>Casual Leave</option>
-                        </select>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Leave Type</label>
+                    <select class="form-select" id="leaveType">
+                        <option th:each="lt : ${leaveTypes}"
+                                th:value="${lt.name()}"
+                                th:text="${lt.displayName}">Annual Leave</option>
+                    </select>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label class="form-label fw-semibold">From Date</label>
+                        <input type="date" class="form-control" id="fromDate">
                     </div>
-                    <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-semibold">From Date</label>
-                            <input type="date" class="form-control">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-semibold">To Date</label>
-                            <input type="date" class="form-control">
-                        </div>
+                    <div class="col-6">
+                        <label class="form-label fw-semibold">To Date</label>
+                        <input type="date" class="form-control" id="toDate">
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Reason</label>
-                        <textarea class="form-control" rows="3" placeholder="Enter reason for leave"></textarea>
-                    </div>
-                    <div class="d-flex justify-content-end gap-2">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-warning text-dark fw-semibold">Submit Request</button>
-                    </div>
-                </form>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Reason</label>
+                    <textarea class="form-control" id="reason" rows="3" placeholder="Enter reason for leave"></textarea>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning text-dark fw-semibold" onclick="submitLeave()">
+                        <i class="bi bi-send me-1"></i>Submit Request
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function showSuccess(msg) {
+        document.getElementById('successMsg').textContent = msg;
+        const el = document.getElementById('successAlert');
+        el.style.removeProperty('display');
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 4000);
+    }
+    function showError(msg) {
+        document.getElementById('errorMsg').textContent = msg;
+        const el = document.getElementById('errorAlert');
+        el.style.removeProperty('display');
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 5000);
+    }
+
+    async function submitLeave() {
+        const leaveType = document.getElementById('leaveType').value;
+        const fromDate = document.getElementById('fromDate').value;
+        const toDate = document.getElementById('toDate').value;
+        const reason = document.getElementById('reason').value;
+
+        if (!fromDate || !toDate) { showError('Please select both From Date and To Date.'); return; }
+
+        const params = new URLSearchParams({ leaveType, fromDate, toDate, reason });
+        try {
+            const resp = await fetch('/api/leave/apply', { method: 'POST', body: params });
+            const data = await resp.json();
+            if (resp.ok) {
+                bootstrap.Modal.getInstance(document.getElementById('applyLeaveModal')).hide();
+                showSuccess('Leave request submitted successfully!');
+                setTimeout(() => location.reload(), 1200);
+            } else {
+                showError(data.error || 'Failed to submit leave request.');
+            }
+        } catch (e) { showError('Network error. Please try again.'); }
+    }
+
+    async function approveLeave(id) {
+        if (!confirm('Approve this leave request?')) return;
+        try {
+            const resp = await fetch('/api/leave/' + id + '/approve', { method: 'POST' });
+            const data = await resp.json();
+            if (resp.ok) { showSuccess('Leave approved successfully!'); setTimeout(() => location.reload(), 1000); }
+            else { showError(data.error || 'Failed to approve leave.'); }
+        } catch (e) { showError('Network error. Please try again.'); }
+    }
+
+    async function rejectLeave(id) {
+        const reason = prompt('Enter rejection reason (optional):') || '';
+        try {
+            const params = new URLSearchParams({ reason });
+            const resp = await fetch('/api/leave/' + id + '/reject?' + params.toString(), { method: 'POST' });
+            const data = await resp.json();
+            if (resp.ok) { showSuccess('Leave rejected.'); setTimeout(() => location.reload(), 1000); }
+            else { showError(data.error || 'Failed to reject leave.'); }
+        } catch (e) { showError('Network error. Please try again.'); }
+    }
+
+    // Set minimum date for leave application to today
+    document.addEventListener('DOMContentLoaded', () => {
+        const today = new Date().toISOString().split('T')[0];
+        const fromInput = document.getElementById('fromDate');
+        const toInput = document.getElementById('toDate');
+        if (fromInput) { fromInput.min = today; fromInput.value = today; }
+        if (toInput) { toInput.min = today; toInput.value = today; }
+        if (fromInput) {
+            fromInput.addEventListener('change', () => { if (toInput) toInput.min = fromInput.value; });
+        }
+    });
+</script>
 </body>
 </html>
