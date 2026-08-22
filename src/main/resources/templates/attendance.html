@@ -145,7 +145,7 @@
             box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
         }
 
-        .btn-checkin:hover {
+        .btn-checkin:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
         }
@@ -156,9 +156,16 @@
             box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
         }
 
-        .btn-checkout:hover {
+        .btn-checkout:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+        }
+
+        .btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            box-shadow: none !important;
+            transform: none !important;
         }
 
         /* Filter Tabs */
@@ -239,7 +246,7 @@
         
         <div id="alertBox" class="alert"></div>
 
-        <!-- Today's Attendance Overview Card -->
+        <!-- Today's Attendance Card -->
         <div class="card">
             <div class="card-header">
                 <div>
@@ -252,11 +259,17 @@
                 </div>
             </div>
 
+            <!-- Action Buttons with Dynamic State Control -->
             <div class="actions-grid">
-                <button class="btn btn-checkin" onclick="performCheckIn()">
+                <!-- Check In button is disabled if already checked in today -->
+                <button id="checkInBtn" class="btn btn-checkin" onclick="performCheckIn()" 
+                        th:disabled="${todayRecord != null and todayRecord.checkIn != null}">
                     ⏱️ Check In
                 </button>
-                <button class="btn btn-checkout" onclick="performCheckOut()">
+
+                <!-- Check Out button is disabled unless checked in AND not yet checked out -->
+                <button id="checkOutBtn" class="btn btn-checkout" onclick="performCheckOut()" 
+                        th:disabled="${todayRecord == null or todayRecord.checkIn == null or todayRecord.checkOut != null}">
                     🛑 Check Out
                 </button>
             </div>
@@ -326,8 +339,6 @@
     </div>
 
     <script th:inline="javascript">
-        const employeeId = [[${employeeId}]];
-
         function showAlert(msg, isSuccess) {
             const box = document.getElementById('alertBox');
             box.style.display = 'block';
@@ -338,7 +349,7 @@
 
         async function performCheckIn() {
             try {
-                const response = await fetch('/api/attendance/check-in?employeeId=' + employeeId, { method: 'POST' });
+                const response = await fetch('/api/attendance/check-in', { method: 'POST' });
                 const data = await response.json();
                 if (response.ok) {
                     showAlert('Check-in successful!', true);
@@ -353,7 +364,7 @@
 
         async function performCheckOut() {
             try {
-                const response = await fetch('/api/attendance/check-out?employeeId=' + employeeId, { method: 'POST' });
+                const response = await fetch('/api/attendance/check-out', { method: 'POST' });
                 const data = await response.json();
                 if (response.ok) {
                     showAlert('Check-out successful!', true);

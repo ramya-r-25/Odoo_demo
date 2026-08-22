@@ -40,38 +40,56 @@ public class AttendanceSecurityTest {
         employee2 = employeeRepository.save(new Employee("EMP-002", "Sarah Connor", "sarah@dayflow.com", "Human Resources"));
     }
 
-    // 1. Employee can view own attendance
+    // 1. Employee can access own attendance
     @Test
     @WithMockUser(username = "alex", roles = {"EMPLOYEE"})
-    public void testEmployeeCanViewOwnAttendance() throws Exception {
+    public void testEmployeeCanAccessOwnAttendance() throws Exception {
         mockMvc.perform(get("/api/attendance/employee/" + employee1.getId()))
                 .andExpect(status().isOk());
     }
 
-    // 2. Unauthorized employee cross-access is blocked with 403 Forbidden
+    // 2. Employee CANNOT access another employee's attendance (403 Forbidden)
     @Test
     @WithMockUser(username = "alex", roles = {"EMPLOYEE"})
-    public void testEmployeeCannotViewOtherEmployeeAttendance() throws Exception {
+    public void testEmployeeCannotAccessOtherEmployeeAttendance() throws Exception {
         mockMvc.perform(get("/api/attendance/employee/" + employee2.getId()))
                 .andExpect(status().isForbidden());
     }
 
-    // 3. HR_ADMIN can view any employee's attendance
+    // 3. HR_ADMIN can access all attendance
     @Test
     @WithMockUser(username = "sarah", roles = {"HR_ADMIN"})
-    public void testHrAdminCanViewAnyEmployeeAttendance() throws Exception {
+    public void testHrAdminCanAccessAllAttendance() throws Exception {
+        mockMvc.perform(get("/api/attendance"))
+                .andExpect(status().isOk());
+
         mockMvc.perform(get("/api/attendance/employee/" + employee1.getId()))
                 .andExpect(status().isOk());
     }
 
-    // 4. Check-in and check-out operation test under authenticated context
+    // 4. Unauthenticated user cannot access attendance API (401 Unauthorized)
+    @Test
+    public void testUnauthenticatedUserCannotAccessAttendanceApi() throws Exception {
+        mockMvc.perform(get("/api/attendance"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    // 5. Employee cannot perform admin attendance operations (403 Forbidden)
+    @Test
+    @WithMockUser(username = "alex", roles = {"EMPLOYEE"})
+    public void testEmployeeCannotPerformAdminOperations() throws Exception {
+        mockMvc.perform(get("/api/attendance"))
+                .andExpect(status().isForbidden());
+    }
+
+    // 6. Check-in and check-out operation test under authenticated context
     @Test
     @WithMockUser(username = "alex", roles = {"EMPLOYEE"})
     public void testCheckInAndCheckOutIntegration() throws Exception {
-        mockMvc.perform(post("/api/attendance/check-in").param("employeeId", employee1.getId().toString()))
+        mockMvc.perform(post("/api/attendance/check-in"))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(post("/api/attendance/check-out").param("employeeId", employee1.getId().toString()))
+        mockMvc.perform(post("/api/attendance/check-out"))
                 .andExpect(status().isOk());
     }
 }

@@ -28,44 +28,71 @@ public class AttendanceController {
         this.attendanceService = attendanceService;
     }
 
-    // Helper method: Validate if the logged-in user can access employeeId
-    private void validateOwnershipOrAdmin(Long employeeId, Authentication authentication) {
+    // Helper: Determine target employee ID based on authentication & role
+    private Long resolveTargetEmployeeId(Long requestEmployeeId, Authentication authentication) {
         if (authentication == null) {
-            return;
+            throw new AccessDeniedException("Unauthorized: Authentication context is missing.");
+        }
+        boolean isHrAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_HR_ADMIN"));
+        Long authenticatedEmployeeId = attendanceService.getEmployeeIdByUsername(authentication.getName());
+
+        if (!isHrAdmin) {
+            // For EMPLOYEE role, ALWAYS use authenticated employee identity to prevent parameter tampering
+            return authenticatedEmployeeId;
+        } else {
+            // For HR_ADMIN, allow specifying employeeId or default to authenticated user
+            return requestEmployeeId != null ? requestEmployeeId : authenticatedEmployeeId;
+        }
+    }
+
+    // Helper: Validate cross-employee ownership access
+    private void validateOwnershipOrAdmin(Long targetEmployeeId, Authentication authentication) {
+        if (authentication == null) {
+            throw new AccessDeniedException("Unauthorized: Authentication context is missing.");
         }
         boolean isHrAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_HR_ADMIN"));
         if (!isHrAdmin) {
-            Long currentEmployeeId = attendanceService.getEmployeeIdByUsername(authentication.getName());
-            if (!currentEmployeeId.equals(employeeId)) {
-                throw new AccessDeniedException("Unauthorized: Employees can view only their own attendance records.");
+            Long authenticatedEmployeeId = attendanceService.getEmployeeIdByUsername(authentication.getName());
+            if (!authenticatedEmployeeId.equals(targetEmployeeId)) {
+                throw new AccessDeniedException("Forbidden: Employees are not allowed to access another employee's attendance.");
             }
         }
     }
 
     // 1. Create Attendance Record
     @PostMapping
-    public ResponseEntity<AttendanceDTO> createAttendance(@Valid @RequestBody AttendanceDTO dto) {
+    public ResponseEntity<AttendanceDTO> createAttendance(@Valid @RequestBody AttendanceDTO dto, Authentication authentication) {
+        if (authentication != null && !authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_HR_ADMIN"))) {
+            throw new AccessDeniedException("Forbidden: Employees cannot create raw attendance records.");
+        }
         AttendanceDTO created = attendanceService.createAttendance(dto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     // 2. Update Attendance Record
     @PutMapping("/{id}")
-    public ResponseEntity<AttendanceDTO> updateAttendance(@PathVariable Long id, @RequestBody AttendanceDTO dto) {
+    public ResponseEntity<AttendanceDTO> updateAttendance(@PathVariable Long id, @RequestBody AttendanceDTO dto, Authentication authentication) {
+        if (authentication != null && !authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_HR_ADMIN"))) {
+            throw new AccessDeniedException("Forbidden: Employees cannot update attendance records.");
+        }
         AttendanceDTO updated = attendanceService.updateAttendance(id, dto);
         return ResponseEntity.ok(updated);
     }
 
-    // 3. Get Attendance Detail (Basic Form View)
+    // 3. Get Attendance Detail
     @GetMapping("/{id}")
-    public ResponseEntity<AttendanceDTO> getAttendanceById(@PathVariable Long id) {
+    public ResponseEntity<AttendanceDTO> getAttendanceById(@PathVariable Long id, Authentication authentication) {
         AttendanceDTO dto = attendanceService.getAttendanceById(id);
+        validateOwnershipOrAdmin(dto.getEmployeeId(), authentication);
         return ResponseEntity.ok(dto);
     }
 
-    // 4. Get All Attendance Records (HR_ADMIN View)
+    // 4. Get All Attendance Records (HR_ADMIN ONLY)
     @GetMapping
-    public ResponseEntity<List<AttendanceDTO>> getAllAttendances() {
+    public ResponseEntity<List<AttendanceDTO>> getAllAttendances(Authentication authentication) {
+        if (authentication != null && !authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_HR_ADMIN"))) {
+            throw new AccessDeniedException("Forbidden: Employee role cannot access all employee attendance records.");
+        }
         List<AttendanceDTO> list = attendanceService.getAllAttendances();
         return ResponseEntity.ok(list);
     }
@@ -86,7 +113,7 @@ public class AttendanceController {
         return ResponseEntity.ok(list);
     }
 
-    // 7. Employee-Specific Attendance View with Ownership Validation Guard
+    // 7. Employee-Specific Attendance View with Strict Security Guard
     @GetMapping("/employee/{employeeId}")
     public ResponseEntity<List<AttendanceDTO>> getEmployeeAttendance(@PathVariable Long employeeId, Authentication authentication) {
         validateOwnershipOrAdmin(employeeId, authentication);
@@ -96,31 +123,30 @@ public class AttendanceController {
 
     // 8. Authenticated Employee Self Attendance View
     @GetMapping("/my-attendance")
-    public ResponseEntity<List<AttendanceDTO>> getMyAttendance(Principal principal) {
-        String username = principal != null ? principal.getName() : "alex";
-        Long employeeId = attendanceService.getEmployeeIdByUsername(username);
+    public ResponseEntity<List<AttendanceDTO>> getMyAttendance(Authentication authentication) {
+        Long employeeId = resolveTargetEmployeeId(null, authentication);
         List<AttendanceDTO> list = attendanceService.getEmployeeAttendance(employeeId);
         return ResponseEntity.ok(list);
     }
 
-    // 9. Employee Check-In Endpoint
+    // 9. Employee Check-In Endpoint (Automatically resolves authenticated user identity)
     @PostMapping("/check-in")
     public ResponseEntity<AttendanceDTO> checkIn(
             @RequestParam(required = false) Long employeeId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime checkInTime,
-            Principal principal) {
-        Long targetEmployeeId = employeeId != null ? employeeId : attendanceService.getEmployeeIdByUsername(principal != null ? principal.getName() : "alex");
+            Authentication authentication) {
+        Long targetEmployeeId = resolveTargetEmployeeId(employeeId, authentication);
         AttendanceDTO dto = attendanceService.employeeCheckIn(targetEmployeeId, checkInTime);
         return ResponseEntity.ok(dto);
     }
 
-    // 10. Employee Check-Out Endpoint
+    // 10. Employee Check-Out Endpoint (Automatically resolves authenticated user identity)
     @PostMapping("/check-out")
     public ResponseEntity<AttendanceDTO> checkOut(
             @RequestParam(required = false) Long employeeId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime checkOutTime,
-            Principal principal) {
-        Long targetEmployeeId = employeeId != null ? employeeId : attendanceService.getEmployeeIdByUsername(principal != null ? principal.getName() : "alex");
+            Authentication authentication) {
+        Long targetEmployeeId = resolveTargetEmployeeId(employeeId, authentication);
         AttendanceDTO dto = attendanceService.employeeCheckOut(targetEmployeeId, checkOutTime);
         return ResponseEntity.ok(dto);
     }
