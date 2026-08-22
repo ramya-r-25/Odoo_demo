@@ -1,47 +1,24 @@
-package com.dayflow.model;
+package com.dayflow.dto;
 
-import jakarta.persistence.*;
+import com.dayflow.model.Role;
 
-/**
- * User Model Entity for Dayflow HRMS.
- */
-@Entity
-@Table(name = "dayflow_users")
-public class User {
+public class RegisterDto {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(unique = true, nullable = false)
     private String employeeId;
-
-    @Column(nullable = false)
     private String name;
-
-    @Column(unique = true, nullable = false)
     private String email;
-
-    @Column(nullable = false)
     private String password;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Role role;
 
-    public User() {
+    public RegisterDto() {
     }
 
-    public User(String employeeId, String name, String email, String password, Role role) {
+    public RegisterDto(String employeeId, String name, String email, String password, Role role) {
         this.employeeId = employeeId;
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public String getEmployeeId() {

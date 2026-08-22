@@ -1,4 +1,11 @@
+target/
 bin/
+sources.txt
+.idea/
+*.iml
+.classpath
+.project
+.settings/
 *.class
 .DS_Store
 __pycache__/

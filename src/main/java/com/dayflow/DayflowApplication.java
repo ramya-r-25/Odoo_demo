@@ -1,88 +1,104 @@
 package com.dayflow;
 
-import com.dayflow.controller.EmployeeController;
+import com.dayflow.attendance.model.Attendance;
+import com.dayflow.attendance.model.AttendanceStatus;
+import com.dayflow.attendance.repository.AttendanceRepository;
+import com.dayflow.attendance.repository.EmployeeRepository;
+import com.dayflow.leave.model.LeaveRequest;
+import com.dayflow.leave.model.LeaveStatus;
+import com.dayflow.leave.model.LeaveType;
+import com.dayflow.leave.repository.LeaveRequestRepository;
 import com.dayflow.model.Employee;
-import com.dayflow.model.Role;
-import com.dayflow.model.User;
-import com.dayflow.repository.EmployeeRepository;
-import com.dayflow.service.EmployeeService;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
-import java.util.Arrays;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+/**
+ * Main Entry Point for Dayflow HRMS Spring Boot Application.
+ *
+ * Seed data strategy:
+ *  - User accounts are seeded in SecurityConfig (EMP001 / HR001)
+ *  - Employee entities are seeded here, linked by employeeCode matching User.employeeId
+ *  - Demo attendance records are created for today
+ *  - Demo leave requests are created to test the approval workflow
+ */
+@SpringBootApplication
 public class DayflowApplication {
 
     public static void main(String[] args) {
-        System.out.println("=================================================================");
-        System.out.println("   STARTING DAYFLOW HRMS - USER-EMPLOYEE RBAC APPLICATION       ");
-        System.out.println("=================================================================");
+        SpringApplication.run(DayflowApplication.class, args);
+    }
 
-        // Initialize Repository, Service, and Controller
-        EmployeeRepository repository = new EmployeeRepository();
-        EmployeeService service = new EmployeeService(repository);
-        EmployeeController controller = new EmployeeController(service);
+    @Bean
+    public CommandLineRunner seedDemoData(
+            EmployeeRepository employeeRepository,
+            AttendanceRepository attendanceRepository,
+            LeaveRequestRepository leaveRequestRepository) {
+        return args -> {
+            // Only seed if no employees exist
+            if (employeeRepository.count() == 0) {
+                // Employee 1: matches User with employeeId = "EMP001" and email = "employee@dayflow.com"
+                Employee emp1 = new Employee();
+                emp1.setEmployeeCode("EMP001");  // matches User.employeeId
+                emp1.setName("John Employee");
+                emp1.setEmail("employee@dayflow.com"); // matches User.email
+                emp1.setDepartment("Engineering");
+                emp1.setJobPosition("Software Engineer");
+                emp1 = employeeRepository.save(emp1);
 
-        // Seed Users
-        User alexUser = new User(1L, "alex.morgan", "alex.morgan@dayflow.com", "pass123", Role.EMPLOYEE, "EMP-001");
-        User sarahUser = new User(2L, "sarah.jenkins", "sarah.jenkins@dayflow.com", "pass123", Role.EMPLOYEE, "EMP-002");
-        User adminUser = new User(3L, "hr.admin", "admin@dayflow.com", "admin123", Role.HR_ADMIN, "EMP-000");
+                // Employee 2: matches User with employeeId = "HR001" and email = "admin@dayflow.com"
+                Employee emp2 = new Employee();
+                emp2.setEmployeeCode("HR001");   // matches User.employeeId
+                emp2.setName("Sarah HR Admin");
+                emp2.setEmail("admin@dayflow.com"); // matches User.email
+                emp2.setDepartment("Human Resources");
+                emp2.setJobPosition("HR Manager");
+                emp2 = employeeRepository.save(emp2);
 
-        // Seed Sample Employee Profiles
-        System.out.println("\n[1] Seeding Initial Employee Profiles...");
-        Employee emp1 = service.createEmployee(new Employee(
-                null, "EMP-001", "Alex Morgan", "alex.morgan@dayflow.com",
-                "+1-555-0192", "123 Tech Blvd, Suite 400", "Software Engineer",
-                "Engineering", 85000.0, "avatar_alex.png",
-                Arrays.asList("resume.pdf", "contract.pdf")
-        ));
+                // Seed attendance for today
+                LocalDate today = LocalDate.now();
+                // emp1: checked in today (open attendance – no checkout yet)
+                attendanceRepository.save(new Attendance(
+                        emp1, today,
+                        LocalDateTime.now().withHour(9).withMinute(0).withSecond(0),
+                        null,
+                        AttendanceStatus.PRESENT));
 
-        Employee emp2 = service.createEmployee(new Employee(
-                null, "EMP-002", "Sarah Jenkins", "sarah.jenkins@dayflow.com",
-                "+1-555-0193", "456 HR Way, Floor 2", "HR Specialist",
-                "Human Resources", 72000.0, "avatar_sarah.png",
-                Arrays.asList("id_proof.pdf")
-        ));
+                // emp2: full day yesterday
+                attendanceRepository.save(new Attendance(
+                        emp2, today.minusDays(1),
+                        LocalDateTime.now().minusDays(1).withHour(9).withMinute(0).withSecond(0),
+                        LocalDateTime.now().minusDays(1).withHour(18).withMinute(0).withSecond(0),
+                        AttendanceStatus.PRESENT));
 
-        System.out.println("Successfully seeded " + repository.findAll().size() + " employee records.");
+                // Seed demo leave requests
+                // Pending leave for emp1 (future)
+                LeaveRequest pending = new LeaveRequest(
+                        emp1, LeaveType.ANNUAL,
+                        today.plusDays(5), today.plusDays(7),
+                        "Planned vacation");
+                leaveRequestRepository.save(pending);
 
-        // Demonstrate HR_ADMIN viewing employee directory
-        System.out.println("\n[2] HR_ADMIN Accessing Employee Directory List:");
-        List<Employee> allEmployees = controller.getEmployeeList(adminUser);
-        for (Employee e : allEmployees) {
-            System.out.println(" - " + e.getEmployeeId() + " | " + e.getFullName() + " | " + e.getJobPosition() + " | Salary: $" + e.getSalary());
-        }
+                // Already approved leave for emp1 in the past
+                LeaveRequest approved = new LeaveRequest(
+                        emp1, LeaveType.SICK,
+                        today.minusDays(10), today.minusDays(10),
+                        "Fever");
+                approved.approve("admin@dayflow.com");
+                leaveRequestRepository.save(approved);
 
-        // Demonstrate EMPLOYEE viewing own profile via User Principal (getMyProfile)
-        System.out.println("\n[3] EMPLOYEE (Alex Morgan) Accessing Own Profile via Authenticated User Principal:");
-        Employee alexProfile = controller.getMyProfile(alexUser);
-        System.out.println(" Profile Name: " + alexProfile.getFullName());
-        System.out.println(" Email       : " + alexProfile.getEmail());
-        System.out.println(" Phone       : " + alexProfile.getPhone());
-        System.out.println(" Address     : " + alexProfile.getAddress());
-
-        // Demonstrate EMPLOYEE editing allowed fields (Phone, Address, Profile Picture)
-        System.out.println("\n[4] EMPLOYEE (Alex Morgan) Updating Phone & Address:");
-        Employee updateAttempt = new Employee();
-        updateAttempt.setPhone("+1-555-9999");
-        updateAttempt.setAddress("789 Innovation Way, Silicon Valley");
-        updateAttempt.setSalary(999999.0); // Attempting to tamper salary!
-
-        Employee updatedAlex = controller.updateEmployee(emp1.getId(), updateAttempt, alexUser);
-        System.out.println(" Updated Phone  : " + updatedAlex.getPhone());
-        System.out.println(" Updated Address: " + updatedAlex.getAddress());
-        System.out.println(" Preserved Salary (Tamper Blocked): $" + updatedAlex.getSalary());
-
-        // Demonstrate HR_ADMIN updating all employee fields (including salary)
-        System.out.println("\n[5] HR_ADMIN Updating Salary & Job Details for Sarah Jenkins:");
-        Employee sarahHrEdit = new Employee(
-                emp2.getId(), emp2.getEmployeeId(), emp2.getFullName(), emp2.getEmail(),
-                emp2.getPhone(), emp2.getAddress(), "Senior HR Lead", emp2.getDepartment(),
-                85000.0, emp2.getProfilePicture(), emp2.getDocuments()
-        );
-        Employee updatedSarah = controller.updateEmployee(emp2.getId(), sarahHrEdit, adminUser);
-        System.out.println(" Updated Position: " + updatedSarah.getJobPosition());
-        System.out.println(" Updated Salary  : $" + updatedSarah.getSalary());
-
-        System.out.println("\n[SUCCESS] Dayflow User-Employee RBAC application executed cleanly without errors!");
+                // Rejected leave for emp2
+                LeaveRequest rejected = new LeaveRequest(
+                        emp2, LeaveType.CASUAL,
+                        today.plusDays(2), today.plusDays(3),
+                        "Personal work");
+                rejected.reject("admin@dayflow.com", "Insufficient staffing during this period");
+                leaveRequestRepository.save(rejected);
+            }
+        };
     }
 }

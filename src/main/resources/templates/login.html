@@ -164,10 +164,10 @@
                 <div class="p-3 rounded text-center" style="background-color: var(--light-gray); border: 1px solid var(--soft-lavender);">
                     <span class="small fw-semibold d-block mb-2" style="color: var(--dark-blue-gray);">Quick Demo Access</span>
                     <div class="d-flex justify-content-center gap-2 flex-wrap">
-                        <span class="demo-pill" onclick="setDemo('alex.morgan@dayflow.com')">
+                        <span class="demo-pill" onclick="setDemo('employee@dayflow.com', 'employee123')">
                             <i class="bi bi-person me-1"></i>Employee
                         </span>
-                        <span class="demo-pill" onclick="setDemo('admin@dayflow.com')">
+                        <span class="demo-pill" onclick="setDemo('admin@dayflow.com', 'admin123')">
                             <i class="bi bi-shield-check me-1"></i>HR Admin
                         </span>
                     </div>
@@ -184,9 +184,9 @@
 </div>
 
 <script>
-    function setDemo(email) {
+    function setDemo(email, password) {
         document.getElementById('usernameInput').value = email;
-        document.getElementById('passwordInput').value = 'pass123';
+        document.getElementById('passwordInput').value = password;
     }
 </script>
 </body>

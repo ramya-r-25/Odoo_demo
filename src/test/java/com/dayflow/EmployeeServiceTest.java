@@ -25,10 +25,10 @@ public class EmployeeServiceTest {
         int passed = 0;
         int failed = 0;
 
-        // Seed Users
-        User alexUser = new User(1L, "alex.morgan", "alex@dayflow.com", "pass123", Role.EMPLOYEE, "EMP-101");
-        User sarahUser = new User(2L, "sarah.connor", "sarah@dayflow.com", "pass123", Role.EMPLOYEE, "EMP-102");
-        User adminUser = new User(3L, "hr.admin", "admin@dayflow.com", "admin123", Role.HR_ADMIN, "EMP-999");
+        // Seed Users — using the 5-arg constructor: (employeeId, name, email, password, role)
+        User alexUser = new User("EMP-101", "Alex Morgan", "alex@dayflow.com", "pass123", Role.EMPLOYEE);
+        User sarahUser = new User("EMP-102", "Sarah Connor", "sarah@dayflow.com", "pass123", Role.EMPLOYEE);
+        User adminUser = new User("EMP-999", "HR Admin", "admin@dayflow.com", "admin123", Role.HR_ADMIN);
 
         // Test 1: Employee Creation & Email Validation
         Employee alexEmp = null;
