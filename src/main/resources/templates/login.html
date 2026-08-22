@@ -31,7 +31,7 @@
             background-color: var(--card-bg);
             border: 1px solid var(--soft-lavender);
             border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(25, 29, 35, 0.25);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
         .brand-icon {
@@ -53,12 +53,13 @@
         }
 
         .form-control {
-            background-color: var(--card-bg);
+            background-color: #ffffff;
             border: 1px solid var(--soft-lavender);
             color: var(--primary-dark);
             border-radius: 12px;
             padding: 0.75rem 1rem;
             font-size: 0.95rem;
+            font-weight: 500;
         }
 
         .form-control:focus {
@@ -87,7 +88,7 @@
             border-radius: 12px;
             padding: 0.8rem 1.5rem;
             font-weight: 600;
-            box-shadow: 0 4px 12px rgba(25, 29, 35, 0.15);
+            box-shadow: 0 4px 12px rgba(25, 29, 35, 0.2);
             transition: all 0.2s ease;
         }
 
@@ -100,11 +101,13 @@
             background-color: var(--soft-lavender);
             color: var(--primary-dark);
             border-radius: 20px;
-            padding: 0.4rem 0.8rem;
-            font-size: 0.8rem;
+            padding: 0.4rem 0.85rem;
+            font-size: 0.82rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
         }
 
         .demo-pill:hover {
@@ -129,28 +132,28 @@
                     <p style="color: var(--dark-blue-gray);" class="small mb-0">Human Resource Management System</p>
                 </div>
 
-                <!-- Alerts -->
-                <div class="alert py-2 small mb-3 border-0" style="background-color: var(--soft-lavender); color: var(--primary-dark);" th:if="${param.error}" role="alert">
+                <!-- Conditional Alerts (Only show when URL param is present) -->
+                <div class="alert py-2 small mb-3 border-0" style="background-color: var(--soft-lavender); color: var(--primary-dark);" th:if="${param.error != null}" role="alert">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>Invalid credentials. Please try again.
                 </div>
-                <div class="alert py-2 small mb-3 border-0" style="background-color: var(--soft-gray-lavender); color: var(--primary-dark);" th:if="${param.logout}" role="alert">
+                <div class="alert py-2 small mb-3 border-0" style="background-color: var(--soft-gray-lavender); color: var(--primary-dark);" th:if="${param.logout != null}" role="alert">
                     <i class="bi bi-check-circle-fill me-2"></i>You have been logged out.
                 </div>
 
                 <!-- Form -->
-                <form th:action="@{/login}" method="post">
+                <form th:action="@{/dashboard}" action="dashboard.html" method="get">
                     <div class="mb-3">
                         <label class="form-label fw-semibold small" style="color: var(--primary-dark);">Username / Email</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-person"></i></span>
-                            <input type="text" id="usernameInput" name="username" class="form-control" placeholder="user@dayflow.com" required autofocus>
+                            <input type="text" id="usernameInput" name="username" class="form-control" placeholder="user@dayflow.com" value="alex.morgan@dayflow.com" required autofocus>
                         </div>
                     </div>
                     <div class="mb-4">
                         <label class="form-label fw-semibold small" style="color: var(--primary-dark);">Password</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                            <input type="password" id="passwordInput" name="password" class="form-control" placeholder="••••••••" required>
+                            <input type="password" id="passwordInput" name="password" class="form-control" placeholder="••••••••" value="pass123" required>
                         </div>
                     </div>
                     <div class="d-grid mb-4">
@@ -160,7 +163,7 @@
                     </div>
                 </form>
 
-                <!-- Demo Access -->
+                <!-- Quick Demo Access -->
                 <div class="p-3 rounded text-center" style="background-color: var(--light-gray); border: 1px solid var(--soft-lavender);">
                     <span class="small fw-semibold d-block mb-2" style="color: var(--dark-blue-gray);">Quick Demo Access</span>
                     <div class="d-flex justify-content-center gap-2 flex-wrap">
